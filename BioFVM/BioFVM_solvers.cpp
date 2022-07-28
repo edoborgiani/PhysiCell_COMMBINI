@@ -49,8 +49,27 @@
 #include "BioFVM_solvers.h" 
 #include "BioFVM_vector.h" 
 
+
+#include "../core/PhysiCell.h"
+/*
+#include "../modules/PhysiCell_standard_modules.h" 
+#include "../modules/PhysiCell_pugixml.cpp"
+#include "../modules/PhysiCell_pugixml.h"
+#include "../core/PhysiCell_phenotype.h"
+#include "../modules/PhysiCell_settings.h"
+*/
+
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
+#include <ctime>
+#include <cmath>
 #include <omp.h>
+#include <fstream>
+#include <string> 
+#include <unistd.h>
+
+using namespace PhysiCell;
 
 namespace BioFVM{
 
@@ -307,6 +326,31 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 		return; 
 	}
 	
+	
+	pugi::xml_node node = xml_find_node(physicell_config_root , "geometry" );
+
+	double dA=xml_get_double_value(node, "dA");
+	double dB=xml_get_double_value(node, "dB");
+	double dC=xml_get_double_value(node, "dC");
+	double dD=xml_get_double_value(node, "dD");
+	double dE=xml_get_double_value(node, "dE");
+	double dF=xml_get_double_value(node, "dF");
+
+	node = node.parent();
+	
+	node = xml_find_node(physicell_config_root , "domain" );
+
+	double dx = xml_get_double_value( node, "dx" );
+	double dy = xml_get_double_value( node, "dy" );
+	double xmin = xml_get_double_value( node, "x_min" );
+	double xmax = xml_get_double_value( node, "x_max" );
+	double ymin = xml_get_double_value( node, "y_min" );
+	double ymax = xml_get_double_value( node, "y_max" );
+
+	double xcen = (xmax-xmin)/2;
+	double ycen = (ymax-ymin)/2;
+	
+
 	// constants for the linear solver (Thomas algorithm) 
 	
 	if( !M.diffusion_solver_setup_done )
@@ -384,6 +428,21 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 	
 	M.apply_dirichlet_conditions();
 
+	std::vector<double> diff_cortex_vector(5,1e-6);
+	diff_cortex_vector *= dt; 
+	diff_cortex_vector /= M.mesh.dx; 
+	diff_cortex_vector /= M.mesh.dx; 
+
+	std::vector<double> diff_marrow_vector(5,1e-4);
+	diff_marrow_vector *= dt; 
+	diff_marrow_vector /= M.mesh.dx; 
+	diff_marrow_vector /= M.mesh.dx; 
+
+	std::vector<double> diff_muscle_vector(5,1e-4);
+	diff_muscle_vector *= dt; 
+	diff_muscle_vector /= M.mesh.dx; 
+	diff_muscle_vector /= M.mesh.dx; 
+
 	// x-diffusion 
 	#pragma omp parallel for 
 	for( unsigned int j=0; j < M.mesh.y_coordinates.size() ; j++ )
@@ -397,7 +456,22 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 		n += M.thomas_i_jump; 
 		for( unsigned int i=1; i < M.mesh.x_coordinates.size() ; i++ )
 		{
-			axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_i_jump] ); 
+			if ((i>((xcen+dD)/dx)||i<((xcen-dD)/dx)) && ((j>=((ycen+dC)/dy) && j<((ycen+dC+dE)/dy))||(j>((ycen-dC-dE)/dy) && j<=((ycen-dC)/dy))))
+			{ 
+				axpy( &(*M.p_density_vectors)[n] , diff_cortex_vector , (*M.p_density_vectors)[n-M.thomas_i_jump] );
+			}
+			else if ((i>((xcen+dB)/dx)||i<((xcen-dB)/dx))  && (j>((ycen-dC)/dy) && j<((ycen-dC)/dy)))
+			{ 
+				axpy( &(*M.p_density_vectors)[n] , diff_marrow_vector , (*M.p_density_vectors)[n-M.thomas_i_jump] );
+			}
+			else if ((j<=(((dA-dC-dE)/dy)+((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx))))||(j>=(((ycen+dA)/dy)-((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx)))))
+			{
+				axpy( &(*M.p_density_vectors)[n] , diff_muscle_vector , (*M.p_density_vectors)[n-M.thomas_i_jump] );
+			}
+			else
+			{
+				axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_i_jump] ); 
+			}	
 			(*M.p_density_vectors)[n] /= M.thomas_denomx[i]; 
 			n += M.thomas_i_jump; 
 		}
@@ -407,7 +481,14 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 
 		for( int i = M.mesh.x_coordinates.size()-2 ; i >= 0 ; i-- )
 		{
-			naxpy( &(*M.p_density_vectors)[n] , M.thomas_cx[i] , (*M.p_density_vectors)[n+M.thomas_i_jump] ); 
+			if ((i>((xcen+dD)/dx)||i<((xcen-dD)/dx)) && ((j>=((ycen+dC)/dy) && j<((ycen+dC+dE)/dy))||(j>((ycen-dC-dE)/dy) && j<=((ycen-dC)/dy))))
+			{
+				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cx[i] , (*M.p_density_vectors)[n+M.thomas_i_jump] ); 
+			}
+			else
+			{
+				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cx[i] , (*M.p_density_vectors)[n+M.thomas_i_jump] );
+			}
 			n -= M.thomas_i_jump; 
 		}
 	}
@@ -428,8 +509,23 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 		n += M.thomas_j_jump; 
 		for( unsigned int j=1; j < M.mesh.y_coordinates.size() ; j++ )
 		{
-			axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_j_jump] ); 
-			(*M.p_density_vectors)[n] /= M.thomas_denomy[j]; 
+			if ((i>((xcen+dD)/dx)||i<((xcen-dD)/dx)) && ((j>=((ycen+dC)/dy) && j<((ycen+dC+dE)/dy))||(j>((ycen-dC-dE)/dy) && j<=((ycen-dC)/dy))))
+			{
+				axpy( &(*M.p_density_vectors)[n] , diff_cortex_vector , (*M.p_density_vectors)[n-M.thomas_j_jump] ); 
+			}
+			else if ((i>((xcen+dB)/dx)||i<((xcen-dB)/dx))  && (j>((ycen-dC)/dy) && j<((ycen-dC)/dy)))
+			{ 
+				axpy( &(*M.p_density_vectors)[n] , diff_marrow_vector , (*M.p_density_vectors)[n-M.thomas_j_jump] );
+			}
+			else if ((j<=(((dA-dC-dE)/dy)+((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx))))||(j>=(((ycen+dA)/dy)-((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx)))))
+			{
+				axpy( &(*M.p_density_vectors)[n] , diff_muscle_vector , (*M.p_density_vectors)[n-M.thomas_j_jump] );
+			}
+			else
+			{  
+				axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_j_jump] );
+			}
+			(*M.p_density_vectors)[n] /= M.thomas_denomy[j];
 			n += M.thomas_j_jump; 
 		}
 
@@ -438,7 +534,14 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 
 		for( int j = M.mesh.y_coordinates.size()-2 ; j >= 0 ; j-- )
 		{
-			naxpy( &(*M.p_density_vectors)[n] , M.thomas_cy[j] , (*M.p_density_vectors)[n+M.thomas_j_jump] ); 
+			if ((i>((xcen+dD)/dx)||i<((xcen-dD)/dx)) && ((j>=((ycen+dC)/dy) && j<((ycen+dC+dE)/dy))||(j>((ycen-dC-dE)/dy) && j<=((ycen-dC)/dy))))
+			{
+				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cy[j] , (*M.p_density_vectors)[n+M.thomas_j_jump] );
+			}
+			else
+			{
+				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cy[j] , (*M.p_density_vectors)[n+M.thomas_j_jump] );
+			}
 			n -= M.thomas_j_jump; 
 		}
 	}

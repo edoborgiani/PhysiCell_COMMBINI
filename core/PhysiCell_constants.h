@@ -69,7 +69,6 @@
 #define __PhysiCell_constants_h__
 
 #include <string>
-#include <unordered_map>
 
 namespace PhysiCell
 {
@@ -115,6 +114,7 @@ class PhysiCell_constants
 	static const int apoptosis_death_model = 100; 
 	static const int necrosis_death_model = 101; 
 	static const int autophagy_death_model = 102; 
+	static const int napoptosis_death_model = 103;
 	
 	static const int custom_cycle_model=9999; 
 	
@@ -150,17 +150,13 @@ class PhysiCell_constants
 	static const int necrotic_lysed=102;
 	static const int necrotic=103; 
 	static const int debris=104; 
+	static const int napoptotic=105; 
 };
 extern std::string time_units;
 extern std::string space_units;
 extern double diffusion_dt; 
 extern double mechanics_dt;
 extern double phenotype_dt;
-extern double intracellular_dt;
-
-
-extern std::unordered_map<std::string,int> cycle_model_codes;
-int find_cycle_model_code( std::string model_name ); 
 
 };
 

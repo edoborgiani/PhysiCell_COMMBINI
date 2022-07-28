@@ -187,7 +187,7 @@ Microenvironment::Microenvironment(std::string name)
 
 void Microenvironment::add_dirichlet_node( int voxel_index, std::vector<double>& value )
 {
-	mesh.voxels[voxel_index].is_Dirichlet=true;
+	mesh.voxels[voxel_index].is_Dirichlet=true; //USER
 	/*
 	dirichlet_indices.push_back( voxel_index );
 	dirichlet_value_vectors.push_back( value ); 
@@ -269,7 +269,7 @@ void Microenvironment::apply_dirichlet_conditions( void )
 	{ density_vector( dirichlet_indices[i] ) = dirichlet_value_vectors[i]; }
 	*/
 
-	// #pragma omp parallel for 
+	#pragma omp parallel for 
 	for( unsigned int i=0 ; i < mesh.voxels.size() ;i++ )
 	{
 		/*
@@ -835,7 +835,9 @@ void Microenvironment::write_to_matlab( std::string filename )
 		// densities  
 
 		for( unsigned int j=0 ; j < (*p_density_vectors)[i].size() ; j++)
-		{ fwrite( (char*) &( ((*p_density_vectors)[i])[j] ) , sizeof(double) , 1 , fp ); }
+		{ 
+		//std::cout << "  TEST " << (*p_density_vectors)[i].size() << ":" << std::endl;
+		fwrite( (char*) &(((*p_density_vectors)[i])[j] ) , sizeof(double) , 1 , fp ); }
 	}
 
 	fclose( fp ); 
@@ -965,6 +967,9 @@ void Microenvironment::compute_all_gradient_vectors( void )
 	static double two_dy = mesh.dy; 
 	static double two_dz = mesh.dz; 
 	static bool gradient_constants_defined = false; 
+
+	int grad_step=1.0;
+
 	if( gradient_constants_defined == false )
 	{
 		two_dx *= 2.0; 
@@ -979,7 +984,7 @@ void Microenvironment::compute_all_gradient_vectors( void )
 		for( unsigned int j=0; j < mesh.y_coordinates.size() ; j++ )
 		{
 			// endcaps 
-			for( unsigned int q=0; q < number_of_densities() ; q++ )
+/* 			for( unsigned int q=0; q < number_of_densities() ; q++ )
 			{
 				int i = 0; 
 				int n = voxel_index(i,j,k);
@@ -1000,22 +1005,42 @@ void Microenvironment::compute_all_gradient_vectors( void )
 				gradient_vectors[n][q][0] /= mesh.dx; 
 				
 				gradient_vector_computed[n] = true; 
-			}
+			} */
 			
 			for( unsigned int i=1; i < mesh.x_coordinates.size()-1 ; i++ )
 			{
 				for( unsigned int q=0; q < number_of_densities() ; q++ )
 				{
 					int n = voxel_index(i,j,k);
+					//std::cout << "pos= "<<i<<" "<<j<<" "<<k<<" "<<n<< std::endl; 
 					// x-derivative of qth substrate at voxel n
-					gradient_vectors[n][q][0] = (*p_density_vectors)[n+thomas_i_jump][q]; 
-					gradient_vectors[n][q][0] -= (*p_density_vectors)[n-thomas_i_jump][q]; 
-					gradient_vectors[n][q][0] /= two_dx; 
-					
-					gradient_vector_computed[n] = true; 
+					gradient_vectors[n][q][0] = 0.0;
+					for( unsigned int s=1; s < grad_step+1 ; s++ ) //USER
+					{
+						int rs=grad_step-s;
+						for(unsigned int t=0; t<rs+1; t++) //only for 2D
+						{
+							gradient_vectors[n][q][0] += (0.5)*(*p_density_vectors)[n+s*thomas_i_jump+t*thomas_j_jump][q]; 
+							gradient_vectors[n][q][0] += (0.5)*(*p_density_vectors)[n+s*thomas_i_jump-t*thomas_j_jump][q];
+							gradient_vectors[n][q][0] -= (0.5)*(*p_density_vectors)[n-s*thomas_i_jump+t*thomas_j_jump][q];
+							gradient_vectors[n][q][0] -= (0.5)*(*p_density_vectors)[n-s*thomas_i_jump-t*thomas_j_jump][q];
+						}
+					}
+					gradient_vector_computed[n] = true;
+					/*if(gradient_vectors[n][q][0]==0) //user
+					{
+						gradient_vectors[n][q][0]=1e-200;
+						//std::cout << "x zero" << std::endl; 
+					}
+					else if(abs(gradient_vectors[n][q][0])<1e-200)
+					{
+						gradient_vectors[n][q][0]=-1+2*(int(abs(gradient_vectors[n][q][0])>0));
+						//std::cout << "x min" << std::endl;  
+						gradient_vectors[n][q][0]*=1e-200;
+					} */
+					//std::cout << "x test= "<<gradient_vectors[n][q][0] << std::endl; 
  				}
 			}
-			
 		}
 	}
 	
@@ -1025,7 +1050,7 @@ void Microenvironment::compute_all_gradient_vectors( void )
 		for( unsigned int i=0; i < mesh.x_coordinates.size() ; i++ )
 		{
 			// endcaps 
-			for( unsigned int q=0; q < number_of_densities() ; q++ )
+/* 			for( unsigned int q=0; q < number_of_densities() ; q++ )
 			{
 				int j = 0; 
 				int n = voxel_index(i,j,k);
@@ -1046,7 +1071,7 @@ void Microenvironment::compute_all_gradient_vectors( void )
 				gradient_vectors[n][q][1] /= mesh.dy; 
 				
 				gradient_vector_computed[n] = true; 
-			}		
+			}	 */	
 			
 			for( unsigned int j=1; j < mesh.y_coordinates.size()-1 ; j++ )
 			{
@@ -1054,13 +1079,33 @@ void Microenvironment::compute_all_gradient_vectors( void )
 				{
 					int n = voxel_index(i,j,k);
 					// y-derivative of qth substrate at voxel n
-					gradient_vectors[n][q][1] = (*p_density_vectors)[n+thomas_j_jump][q]; 
-					gradient_vectors[n][q][1] -= (*p_density_vectors)[n-thomas_j_jump][q]; 
-					gradient_vectors[n][q][1] /= two_dy; 
+					gradient_vectors[n][q][1] = 0.0;
+					for( unsigned int s=1; s < grad_step+1 ; s++ ) //USER
+					{	
+						int rs=grad_step-s;
+						for(unsigned int t=0; t<rs+1; t++) //only for 2D
+						{
+							gradient_vectors[n][q][1] += (0.5)*(*p_density_vectors)[n+s*thomas_j_jump+t*thomas_i_jump][q]; 
+							gradient_vectors[n][q][1] += (0.5)*(*p_density_vectors)[n+s*thomas_j_jump-t*thomas_i_jump][q];
+							gradient_vectors[n][q][1] -= (0.5)*(*p_density_vectors)[n-s*thomas_j_jump+t*thomas_i_jump][q];
+							gradient_vectors[n][q][1] -= (0.5)*(*p_density_vectors)[n-s*thomas_j_jump-t*thomas_i_jump][q];
+						}
+					}
 					gradient_vector_computed[n] = true; 
+					/*if(gradient_vectors[n][q][1]==0) //user
+					{
+						gradient_vectors[n][q][1]=1e-200;
+						//std::cout << "y zero" << std::endl; 
+					}
+					else if(abs(gradient_vectors[n][q][1])<1e-200)
+					{
+						gradient_vectors[n][q][1]=-1+2*(int(abs(gradient_vectors[n][q][1])>0));
+						//std::cout << "y min" << std::endl;  
+						gradient_vectors[n][q][1]*=1e-200;
+					}*/
+					//std::cout << "y test= "<<gradient_vectors[n][q][1] << std::endl; 
 				}
 			}
-			
 		}
 	}
 	
@@ -1074,7 +1119,7 @@ void Microenvironment::compute_all_gradient_vectors( void )
 		for( unsigned int i=0; i < mesh.x_coordinates.size() ; i++ )
 		{
 			// endcaps 
-			for( unsigned int q=0; q < number_of_densities() ; q++ )
+/* 			for( unsigned int q=0; q < number_of_densities() ; q++ )
 			{
 				int k = 0; 
 				int n = voxel_index(i,j,k);
@@ -1095,7 +1140,7 @@ void Microenvironment::compute_all_gradient_vectors( void )
 				gradient_vectors[n][q][2] /= mesh.dz; 
 				
 				gradient_vector_computed[n] = true; 
-			}			
+			}		 */	
 			
 			for( unsigned int k=1; k < mesh.z_coordinates.size()-1 ; k++ )
 			{
@@ -1107,8 +1152,20 @@ void Microenvironment::compute_all_gradient_vectors( void )
 					gradient_vectors[n][q][2] -= (*p_density_vectors)[n-thomas_k_jump][q]; 
 					gradient_vectors[n][q][2] /= two_dz; 
 					gradient_vector_computed[n] = true; 
+					/*if(gradient_vectors[n][q][2]==0) //user
+					{
+						gradient_vectors[n][q][2]=1e-200;
+						//std::cout << "z zero" << std::endl; 
+					}
+					else if(abs(gradient_vectors[n][q][2])<1e-200)
+					{
+						gradient_vectors[n][q][2]=-1+2*(int(abs(gradient_vectors[n][q][2])>0));
+						//std::cout << "z min" << std::endl;  
+						gradient_vectors[n][q][2]*=1e-200;
+					}*/
+					//std::cout << "z test= "<<gradient_vectors[n][q][2] << std::endl;
 				}
-			}
+			} 
 			
 		}
 	}
@@ -1123,12 +1180,14 @@ void Microenvironment::compute_gradient_vector( int n )
 	static double two_dz = mesh.dz; 
 	static bool gradient_constants_defined = false; 
 	std::vector<unsigned int> indices(3,0);
+
+	int grad_step=1.0;
 	
 	if( gradient_constants_defined == false )
 	{
-		two_dx *= 2.0; 
-		two_dy *= 2.0; 
-		two_dz *= 2.0;
+		two_dx *= 2.0; //*grad_step; 
+		two_dy *= 2.0; //*grad_step; 
+		two_dz *= 2.0; //*grad_step;
 		gradient_constants_defined = true; 
 	}	
 	
@@ -1139,10 +1198,32 @@ void Microenvironment::compute_gradient_vector( int n )
 	{
 		for( unsigned int q=0; q < number_of_densities() ; q++ )
 		{
-			gradient_vectors[n][q][0] = (*p_density_vectors)[n+thomas_i_jump][q]; 
-			gradient_vectors[n][q][0] -= (*p_density_vectors)[n-thomas_i_jump][q]; 
+			gradient_vectors[n][q][0] = 0.0;
+			for( unsigned int s=1; s < grad_step+1 ; s++ ) //USER
+			{
+				int rs=grad_step-s;
+				for(unsigned int t=0; t<rs+1; t++) //only for 2D
+				{
+					gradient_vectors[n][q][0] += (0.5)*(*p_density_vectors)[n+s*thomas_i_jump+t*thomas_j_jump][q]; 
+					gradient_vectors[n][q][0] += (0.5)*(*p_density_vectors)[n+s*thomas_i_jump-t*thomas_j_jump][q];
+					gradient_vectors[n][q][0] -= (0.5)*(*p_density_vectors)[n-s*thomas_i_jump+t*thomas_j_jump][q];
+					gradient_vectors[n][q][0] -= (0.5)*(*p_density_vectors)[n-s*thomas_i_jump-t*thomas_j_jump][q];
+				}
+			}
 			gradient_vectors[n][q][0] /= two_dx; 
 			gradient_vector_computed[n] = true; 
+ 			if(gradient_vectors[n][q][0]==0)
+			{
+				gradient_vectors[n][q][0]=1e-10;
+				std::cout << "x zero" << std::endl; 
+			}
+			else if(abs(gradient_vectors[n][q][0])<1e-10)
+			{
+				gradient_vectors[n][q][0]/=abs(gradient_vectors[n][q][0]);
+				std::cout << "x min" << std::endl;  
+				gradient_vectors[n][q][0]*=1e-10;
+			} 
+			std::cout << "x test= "<<gradient_vectors[n][q][0] << std::endl; 
 		}
 	}
 	
@@ -1155,10 +1236,32 @@ void Microenvironment::compute_gradient_vector( int n )
 	{
 		for( unsigned int q=0; q < number_of_densities() ; q++ )
 		{
-			gradient_vectors[n][q][1] = (*p_density_vectors)[n+thomas_j_jump][q]; 
-			gradient_vectors[n][q][1] -= (*p_density_vectors)[n-thomas_j_jump][q]; 
+			gradient_vectors[n][q][1] = 0.0;
+			for( unsigned int s=1; s < grad_step+1 ; s++ ) //USER
+			{	
+				int rs=grad_step-s;
+				for(unsigned int t=0; t<rs+1; t++) //only for 2D
+				{
+					gradient_vectors[n][q][1] += (0.5)*(*p_density_vectors)[n+s*thomas_j_jump+t*thomas_i_jump][q]; 
+					gradient_vectors[n][q][1] += (0.5)*(*p_density_vectors)[n+s*thomas_j_jump-t*thomas_i_jump][q];
+					gradient_vectors[n][q][1] -= (0.5)*(*p_density_vectors)[n-s*thomas_j_jump+t*thomas_i_jump][q];
+					gradient_vectors[n][q][1] -= (0.5)*(*p_density_vectors)[n-s*thomas_j_jump-t*thomas_i_jump][q];
+				}
+			}
 			gradient_vectors[n][q][1] /= two_dy; 
 			gradient_vector_computed[n] = true; 
+ 			if(gradient_vectors[n][q][1]==0)
+			{
+				gradient_vectors[n][q][1]=1e-10;
+				std::cout << "y zero" << std::endl; 
+			}
+			else if(abs(gradient_vectors[n][q][1])<1e-10)
+			{
+				gradient_vectors[n][q][1]/=abs(gradient_vectors[n][q][1]);
+				std::cout << "y min" << std::endl; 
+				gradient_vectors[n][q][1]*=1e-10;
+			} 
+			std::cout << "y test= "<<gradient_vectors[n][q][1] << std::endl; 
 		}
 	}
 	
@@ -1171,8 +1274,12 @@ void Microenvironment::compute_gradient_vector( int n )
 	{
 		for( unsigned int q=0; q < number_of_densities() ; q++ )
 		{
-			gradient_vectors[n][q][2] = (*p_density_vectors)[n+thomas_k_jump][q]; 
-			gradient_vectors[n][q][2] -= (*p_density_vectors)[n-thomas_k_jump][q]; 
+			gradient_vectors[n][q][2] = 0;
+			for( unsigned int s=1; s < grad_step ; s++ ) //USER
+			{	
+				gradient_vectors[n][q][2] += (0.5)*(*p_density_vectors)[n+s*thomas_k_jump][q]; 
+				gradient_vectors[n][q][2] -= (0.5)*(*p_density_vectors)[n-s*thomas_k_jump][q]; 
+			}
 			gradient_vectors[n][q][2] /= two_dz; 
 			gradient_vector_computed[n] = true; 
 		}
@@ -1198,7 +1305,7 @@ Microenvironment microenvironment;
 
 Microenvironment_Options::Microenvironment_Options()
 {
-	use_oxygen_as_first_field = true; 
+	use_oxygen_as_first_field = false; 
 	
 	if( get_default_microenvironment() != NULL )
 	{
@@ -1224,17 +1331,17 @@ Microenvironment_Options::Microenvironment_Options()
 	initial_condition_vector.resize(0); //  = Dirichlet_condition_vector; 
 	
 	// set a far-field value for oxygen (assumed to be in the first field)
-	Dirichlet_condition_vector[0] = 38.0; 
+	Dirichlet_condition_vector[0] = 0.0; 
 	
 	simulate_2D = false; 
 	
-	X_range.resize(2,500.0); 
+	X_range.resize(2,600.0); 
 	X_range[0] *= -1.0;
 	
-	Y_range.resize(2,500.0); 
+	Y_range.resize(2,600.0); 
 	Y_range[0] *= -1.0;
 	
-	Z_range.resize(2,500.0); 
+	Z_range.resize(2,600.0); 
 	Z_range[0] *= -1.0;
 	
 	calculate_gradients = false; 

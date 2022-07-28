@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+###############################################################################
+# If you use PhysiCell in your project, please cite PhysiCell and the version #
+# number, such as below:                                                      #
+#                                                                             #
+# We implemented and solved the model using PhysiCell (Version x.y.z) [1].    #
+#                                                                             #
+# [1] A Ghaffarizadeh, R Heiland, SH Friedman, SM Mumenthaler, and P Macklin, #
+#     PhysiCell: an Open Source Physics-Based Cell Simulator for Multicellu-  #
+#     lar Systems, PLoS Comput. Biol. 14(2): e1005991, 2018                   #
+#     DOI: 10.1371/journal.pcbi.1005991                                       #
+#                                                                             #
+# See VERSION.txt or call get_PhysiCell_version() to get the current version  #
+#     x.y.z. Call display_citations() to get detailed information on all cite-#
+#     able software used in your PhysiCell application.                       #
+#                                                                             #
+# Because PhysiCell extensively uses BioFVM, we suggest you also cite BioFVM  #
+#     as below:                                                               #
+#                                                                             #
+# We implemented and solved the model using PhysiCell (Version x.y.z) [1],    #
+# with BioFVM [2] to solve the transport equations.                           #
+#                                                                             #
+# [1] A Ghaffarizadeh, R Heiland, SH Friedman, SM Mumenthaler, and P Macklin, #
+#     PhysiCell: an Open Source Physics-Based Cell Simulator for Multicellu-  #
+#     lar Systems, PLoS Comput. Biol. 14(2): e1005991, 2018                   #
+#     DOI: 10.1371/journal.pcbi.1005991                                       #
+#                                                                             #
+# [2] A Ghaffarizadeh, SH Friedman, and P Macklin, BioFVM: an efficient para- #
+#     llelized diffusive transport solver for 3-D biological simulations,     #
+#     Bioinformatics 32(8): 1256-8, 2016. DOI: 10.1093/bioinformatics/btv730  #
+#                                                                             #
+###############################################################################
+#                                                                             #
+# BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
+#                                                                             #
+# Copyright (c) 2015-2018, Paul Macklin and the PhysiCell Project             #
+# All rights reserved.                                                        #
+#                                                                             #
+# Redistribution and use in source and binary forms, with or without          #
+# modification, are permitted provided that the following conditions are met: #
+#                                                                             #
+# 1. Redistributions of source code must retain the above copyright notice,   #
+# this list of conditions and the following disclaimer.                       #
+#                                                                             #
+# 2. Redistributions in binary form must reproduce the above copyright        #
+# notice, this list of conditions and the following disclaimer in the         #
+# documentation and/or other materials provided with the distribution.        #
+#                                                                             #
+# 3. Neither the name of the copyright holder nor the names of its            #
+# contributors may be used to endorse or promote products derived from this   #
+# software without specific prior written permission.                         #
+#                                                                             #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" #
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE   #
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE  #
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE   #
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR         #
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF        #
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS    #
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN     #
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)     #
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE  #
+# POSSIBILITY OF SUCH DAMAGE.                                                 #
+#                                                                             #
+###############################################################################
+*/
+--> 
+
+<!--
+<user_details />
+-->
+
+<PhysiCell_settings version="devel-version">
+	<domain>
+<!--	<x_min>-750</x_min>
+		<x_max>700</x_max>
+		<y_min>-1000</y_min>
+		<y_max>1000</y_max> --> <!-- 1/4 callus -->
+		<x_min>-1000</x_min>
+		<x_max>1000</x_max>
+		<y_min>-1000</y_min>
+		<y_max>1000</y_max> <!-- full callus -->
+		<z_min>-5</z_min>
+		<z_max>5</z_max>
+		<dx>10</dx>
+		<dy>10</dy>
+		<dz>10</dz>
+		<use_2D>true</use_2D>
+	</domain>
+	
+	<overall>
+		<max_time units="min">7200</max_time> <!-- 5 days * 24 h * 60 min -->
+		<time_units>min</time_units>
+		<space_units>micron</space_units>
+	
+		<dt_diffusion units="min">0.01</dt_diffusion>
+		<dt_mechanics units="min">0.1</dt_mechanics>
+		<dt_phenotype units="min">1</dt_phenotype>	
+	</overall>
+	
+	<parallel>
+		<omp_num_threads>4</omp_num_threads>
+	</parallel> 
+	
+	<save>
+		<folder>output</folder> <!-- use . for root --> 
+
+		<full_data>
+			<interval units="min">360</interval>
+			<enable>true</enable>
+		</full_data>
+		
+		<SVG>
+			<interval units="min">60</interval>
+			<enable>true</enable>
+		</SVG>
+		
+		<legacy_data>
+			<enable>false</enable>
+		</legacy_data>
+	</save>
+	
+	<microenvironment_setup>
+		<variable units="ng/micron^3" ID="0" name="debris">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">1.0</diffusion_coefficient> <!-- 1 -->
+				<decay_rate units="1/min">0</decay_rate>   <!-- 0 -->
+			</physical_parameter_set>
+			<initial_condition units="ng/micron^3">0</initial_condition>
+			<Dirichlet_boundary_condition units="ng/micron^3" enabled="true">0</Dirichlet_boundary_condition>
+		</variable>
+
+		<variable units="ng/micron^3" ID="1" name="TNFa">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">1800</diffusion_coefficient> <!-- http://www.math.ubc.ca/~ais/website/status/diffuse.html -->
+				<decay_rate units="1/min">0.0089</decay_rate> <!-- d_TNF 0.5331/60 Wong 2001 -->
+			</physical_parameter_set>
+			<initial_condition units="ng/micron^3">0</initial_condition>
+			<Dirichlet_boundary_condition units="ng/micron^3" enabled="true">0</Dirichlet_boundary_condition>
+		</variable>
+
+		<variable units="ng/micron^3" ID="2" name="TGFb">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">1560</diffusion_coefficient> <!-- http://www.math.ubc.ca/~ais/website/status/diffuse.html -->
+				<decay_rate units="1/min">0.0116</decay_rate> <!-- d_TGF 0.693/60 Werner 2003 -->
+			</physical_parameter_set>
+			<initial_condition units="ng/micron^3">0</initial_condition>
+			<Dirichlet_boundary_condition units="ng/micron^3" enabled="true">0</Dirichlet_boundary_condition>
+		</variable>
+
+		<variable units="ng/micron^3" ID="3" name="IL10">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">1800</diffusion_coefficient> <!-- assumed 17kDa weight from http://www.math.ubc.ca/~ais/website/status/diffuse.html -->
+				<decay_rate units="1/min">0.00322</decay_rate> <!-- d_IL10 0.193/60 Reynolds 2006 -->
+			</physical_parameter_set>
+			<initial_condition units="ng/micron^3">0</initial_condition>
+			<Dirichlet_boundary_condition units="ng/micron^3" enabled="true">0</Dirichlet_boundary_condition>
+		</variable>
+
+		<variable units="ng/micron^3" ID="4" name="IFNg">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">1700</diffusion_coefficient> <!-- assumed 22kDa weight from http://www.math.ubc.ca/~ais/website/status/diffuse.html -->
+				<decay_rate units="1/min">0.00322</decay_rate> <!-- d_IFN Test value, expecting to find better fit -->
+			</physical_parameter_set>
+			<initial_condition units="ng/micron^3">0</initial_condition>
+			<Dirichlet_boundary_condition units="ng/micron^3" enabled="true">0</Dirichlet_boundary_condition>
+		</variable>
+	
+		<options>
+			<calculate_gradients>true</calculate_gradients>
+			<track_internalized_substrates_in_each_agent>true</track_internalized_substrates_in_each_agent>
+		</options>
+	</microenvironment_setup>		
+	
+	<user_parameters>
+
+		<!-- Debris D -->
+		<k_e1 type="double" units="1/min"> 3.33e-2 </k_e1> <!--3.33e-2 48/(24*60) Trejo 2019 -->
+		<k_e2 type="double" units="1/min"> 3.33e-2 </k_e2> <!--3.33e-2 48/(24*60) Trejo 2019 -->	
+		<a_ed type="double" units="particles/micron^3"> 4.71e-6 </a_ed> <!-- particles/mL -> particles/um^3 Trejo 2019 -->
+		<k_en type="double" units="1/min"> 3.33e-3 </k_en> <!-- test02: 3.33e-3 -->	
+		<a_edn type="double" units="particles/micron^3"> 4.71e-6 </a_edn> <!-- particles/mL -> particles/um^3 test -->		
+		
+		<!-- General macrophages -->
+		<macro_volume type="double" units="micron^3"> 1.0e3 </macro_volume> <!-- McWhorter 2013 -->
+		<m_ms type="double" units="micron/min"> 1.0 </m_ms> <!-- Pixley 2012 -->
+		<m_mb type="double" units="dimensionless"> 0.5 </m_mb>
+
+		<!-- Inactivated macrophages M0 -->
+		<k_Rmax type="double" units="1/h"> 2.1e-2 </k_Rmax>
+		<M0_max type="double" units="cell/micron^3"> 1.0e-4 </M0_max> <!-- Test -->
+		<k_A0 type="double" units="1/min"> 2.36e-5 </k_A0> <!-- 0.034 day^-1 Catelas 2005 -->
+		<k_P0 type="double" units="1/min"> 8.33e-4 </k_P0> <!-- Doubling Time = 20h Chitu 2011 -->
+		<k_0 type="double" units="dimensionless"> 2.8e-1 </k_0> 
+		<a_0 type="double" units="ng/micron^3"> 5.0e-12 </a_0>
+		<!--- Recruitment --->
+		<initial_M0 type="double" units="cell/mm^2"> 200 </initial_M0> 
+		<frac_marrow type="double" units="dimensionless"> 0.5 </frac_marrow> 
+
+		<!-- Macrophages M1 -->
+		<k_01 type="double" units="1/min"> 4.17e-4 </k_01> <!-- 0.611 day^-1 Trejo 2019 -->
+		<a_01 type="double" units="ng/micron^3"> 1.0e-13 </a_01> <!-- 1e-14 ng/mL Trejo 2019 -->
+		<k_A1 type="double" units="1/min"> 2.36e-5 </k_A1> <!-- 0.034 day^-1 Catelas 2005 -->
+		<k_P1 type="double" units="1/min"> 8.33e-4 </k_P1> <!-- Doubling Time = 20h Chitu 2011 -->
+		<k_1 type="double" units="dimensionless"> 2.8e-1 </k_1> 
+		<a_1 type="double" units="ng/micron^3"> 5.0e-12 </a_1> 
+		<k_21 type="double" units="1/min"> 3.47e-6 </k_21> <!-- 0.005 day^-1 Trejo 2019 -->
+		<a_21 type="double" units="ng/micron^3"> 1.0e-13 </a_21> <!-- 1e-14 ng/mL Trejo 2019 -->
+		
+		<!-- Macrophages M2 -->
+		<k_02 type="double" units="1/min"> 2.08e-4 </k_02> <!-- 0.3 day^-1 Trejo 2019 -->
+		<a_02 type="double" units="ng/micron^3"> 5.0e-13 </a_02> <!-- 5e-15 ng/mL Trejo 2019 -->
+		<k_A2 type="double" units="1/min"> 2.36e-5 </k_A2> <!-- 0.034 day^-1 Catelas 2005 -->
+		<k_P2 type="double" units="1/min"> 8.33e-4 </k_P2> <!-- Doubling Time = 20h Chitu 2011 -->
+		<k_2 type="double" units="dimensionless"> 2.8e-1 </k_2> 
+		<a_2 type="double" units="ng/micron^3"> 5.0e-12 </a_2> 
+		<k_12 type="double" units="1/min"> 5.76e-5 </k_12> <!-- 0.083 day^-1 Trejo 2019 -->
+		<a_12 type="double" units="ng/micron^3"> 5.0e-13 </a_12> <!-- 5e-15 ng/mL Trejo 2019 -->
+
+		<!-- Neutrophils -->
+		<neutro_volume type="double" units="micron^3"> 600 </neutro_volume> <!-- https://www.histology.leeds.ac.uk/blood/blood_wbc.php -->
+		<n_ms type="double" units="micron/min"> 5.0 </n_ms> <!-- Friedl 1998 -->
+		<n_mb type="double" units="dimensionless"> 0.2 </n_mb> <!--  -->
+
+		<!-- PMN -->
+		<k_RNmax type="double" units="1/h"> 2.1e-2 </k_RNmax>
+		<PMN_max type="double" units="cell/micron^3"> 1.0e-3 </PMN_max> <!-- Test -->
+		<k_AN type="double" units="1/min"> 7.0e-5 </k_AN> <!-- 0.1 day^-1 -->
+		<!--- Recruitment --->
+		<initial_PMN type="double" units="cell/mm^2"> 1000 </initial_PMN> 
+
+		<!--- TNFa --->
+		<k_T0 type="double" units="ng/micron^3/min"> 5.78e-12 </k_T0> <!-- Byrne 2002 -->
+		<k_TI type="double" units="dimensionless"> 2.0e-1 </k_TI>
+		<a_TI type="double" units="ng/micron^3"> 6.0e-9 </a_TI>
+		<k_T1 type="double" units="ng/micron^3/min"> 5.78e-12 </k_T1> <!-- Byrne 2002 -->
+		<k_TIL type="double" units="dimensionless"> 4.6e-1 </k_TIL>
+		<a_TIL type="double" units="micron^3/ng"> 1.53e12 </a_TIL>
+		<b_TIL type="double" units="dimensionless"> 5.44e-1 </b_TIL>
+		<k_TTGF type="double" units="dimensionless"> 6.21e-1 </k_TTGF>
+		<a_TTGF type="double" units="micron^3/ng"> 8.3e11 </a_TTGF>
+		<b_TTGF type="double" units="dimensionless"> 4.47e-1 </b_TTGF>
+		<k_T2 type="double" units="ng/micron^3/min"> 7.15e-13 </k_T2> <!-- Byrne 2002 -->
+		<k_TN type="double" units="ng/micron^3/min"> 4.61e-13 </k_TN> <!-- Cassatella 1995 -->
+		<!--- d_TNF in Microenvironment setup ---> 
+
+		<!--- IL-10 --->
+		<k_I0 type="double" units="ng/micron^3/min"> 1.267e-12 </k_I0> <!-- Byrne 2002 -->
+		<k_I1 type="double" units="ng/micron^3/min"> 1.267e-12 </k_I1> <!-- Byrne 2002 -->
+		<a_I1 type="double" units="micron^3/ng"> 2.75e14 </a_I1> 
+		<k_I2 type="double" units="ng/micron^3/min"> 2.58e-12 </k_I2> <!-- Byrne 2002 -->
+		<!--- d_IL10 in Microenvironment setup ---> 
+
+		<!--- TGFb --->
+		<k_TG0 type="double" units="ng/micron^3/min"> 3.13e-11 </k_TG0> <!-- Fadok 1998 -->
+		<k_TG1 type="double" units="ng/micron^3/min"> 3.13e-11 </k_TG1> <!-- Fadok 1998 -->
+		<k_TG2 type="double" units="ng/micron^3/min"> 2.66e-11 </k_TG2> <!-- Fadok 1998 -->
+		<!--- d_TGF in Microenvironment setup ---> 
+
+		<!--- IFNg --->
+		<k_IF0 type="double" units="ng/micron^3/min"> 5.2e-15 </k_IF0> <!-- adapted from Munder 1998 -->
+		<a_IF0 type="double" units="micron^3/ng"> 1.64e10 </a_IF0>
+		<k_IF1 type="double" units="ng/micron^3/min"> 5.2e-15 </k_IF1> <!-- adapted from Munder 1998 -->
+		<a_IF1 type="double" units="micron^3/ng"> 1.64e10 </a_IF1>
+		<k_IFN type="double" units="ng/micron^3/min"> 2.08e-13 </k_IFN> <!-- adapted from Ethuin 2004 -->
+		<!--- d_IFN in Microenvironment setup ---> 
+
+		<!-- assumed 1 cell = 1000 micron^3 (cell volume) -->
+		<!-- assumed 1 cell = 600 micron^3 (PMN volume) -->
+
+		<!-- MSCs -->
+		<mesenchimal_volume type="double" units="micron^3"> 2600 </mesenchimal_volume> <!-- https://www.histology.leeds.ac.uk/blood/blood_wbc.php -->
+		<mesenchimal_proliferation_ratio type="double" units="1/min"> 4.16e-4 </mesenchimal_proliferation_ratio> <!-- Isaksson 2008 -->
+		<mesenchimal_migration_speed type="double" units="micron/min"> 0.5 </mesenchimal_migration_speed> <!-- 30 um/h Appendu & Shur 1994 -->
+		<mesenchimal_migration_bias type="double" units="dimensionless"> 0.1 </mesenchimal_migration_bias> <!--  -->
+		<mesenchimal_apoptosis_ratio type="double" units="1/min"> 3.5e-5 </mesenchimal_apoptosis_ratio> <!-- 0.05 day^-1 Isaksson 2008 -->
+		<!-- <mesenchimal_max_concentration type="double" units="cell/micron^3"> 1e-3 </mesenchimal_max_concentration> <!-- Test -->
+
+		<random_seed type="int" units="dimensionless">0</random_seed> 
+		<!-- example parameters from the template --> 
+		<cyto_diffusion_coefficient type="double" units="micron^2/min">1e3</cyto_diffusion_coefficient>
+		
+	</user_parameters>
+	
+</PhysiCell_settings>

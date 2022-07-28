@@ -33,7 +33,7 @@
 #                                                                             #
 # BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)     #
 #                                                                             #
-# Copyright (c) 2015-2021, Paul Macklin and the PhysiCell Project             #
+# Copyright (c) 2015-2018, Paul Macklin and the PhysiCell Project             #
 # All rights reserved.                                                        #
 #                                                                             #
 # Redistribution and use in source and binary forms, with or without          #
@@ -127,9 +127,6 @@ PhysiCell_Settings::PhysiCell_Settings()
 	
 	SVG_save_interval = 60; 
 	enable_SVG_saves = true; 
-
-	intracellular_save_interval = 60;  
-	enable_intracellular_saves = false; 
 	
 	// parallel options 
 	
@@ -165,10 +162,6 @@ void PhysiCell_Settings::read_from_pugixml( void )
 	search_result = xml_find_node( node , "dt_phenotype" ); 
 	if( search_result )
 	{ phenotype_dt = xml_get_my_double_value( search_result ); }
-
-	search_result = xml_find_node( node , "dt_intracellular" ); 
-	if( search_result )
-	{ intracellular_dt = xml_get_my_double_value( search_result ); }
 	
 	node = node.parent(); 
 	
@@ -187,11 +180,6 @@ void PhysiCell_Settings::read_from_pugixml( void )
 	SVG_save_interval = xml_get_double_value( node , "interval" );
 	enable_SVG_saves = xml_get_bool_value( node , "enable" ); 
 	node = node.parent(); 
-
-	node = xml_find_node( node , "intracellular_data" ); 
-	intracellular_save_interval = xml_get_double_value( node , "interval" );
-	enable_intracellular_saves = xml_get_bool_value( node , "enable" ); 
-	node = node.parent(); 
 	
 	node = xml_find_node( node , "legacy_data" ); 
 	enable_legacy_saves = xml_get_bool_value( node , "enable" );
@@ -203,28 +191,6 @@ void PhysiCell_Settings::read_from_pugixml( void )
 	omp_num_threads = xml_get_int_value( node, "omp_num_threads" ); 
 	
 	node = node.parent(); 
-	
-	// legacy and other options 
-	
-	pugi::xml_node node_options; 
-	
-	node_options = xml_find_node( physicell_config_root , "options" ); 
-	if( node_options )
-	{
-		bool settings; 
-		
-		// look for legacy_random_points_on_sphere_in_divide 
-		settings = 
-			xml_get_bool_value( node_options, "legacy_random_points_on_sphere_in_divide" ); 
-		if( settings )
-		{
-			std::cout << "setting legacy unif" << std::endl; 
-			extern std::vector<double> (*cell_division_orientation)(void); 
-			cell_division_orientation = LegacyRandomOnUnitSphere; 
-		}
-	
-		// other options can go here, eventually 
-	}
 	
 	// domain options 
 	
@@ -239,6 +205,19 @@ void PhysiCell_Settings::read_from_pugixml( void )
 	double dx = xml_get_double_value( node, "dx" ); 
 	double dy = xml_get_double_value( node, "dy" ); 
 	double dz = xml_get_double_value( node, "dz" ); 
+
+	// geometry options
+
+	node = node.parent();
+
+	node = xml_find_node( physicell_config_root , "geometry" );
+
+	double dA=xml_get_double_value(node, "dA");
+	double dB=xml_get_double_value(node, "dB");
+	double dC=xml_get_double_value(node, "dC");
+	double dD=xml_get_double_value(node, "dD");
+	double dE=xml_get_double_value(node, "dE");
+	double dF=xml_get_double_value(node, "dF");
 	
 	default_microenvironment_options.simulate_2D = xml_get_bool_value( node, "use_2D" ); 
 
@@ -767,7 +746,7 @@ bool setup_microenvironment_from_XML( pugi::xml_node root_node )
 					{ Dirichlet_zmax_values[i] = xml_get_my_double_value( node2 ); }
 				}
 				
-				node2 = node2.next_sibling("boundary_value"); 
+				node2 = node2.next_sibling("boundary"); 
 			}
 		}
 		

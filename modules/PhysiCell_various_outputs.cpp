@@ -194,7 +194,7 @@ void log_output(double t, int output_index, Microenvironment microenvironment, s
 	writeCellReport(*all_cells, t);
 	std::string filename; 
 	filename.resize( 1024 , '\0' ); 
-	sprintf( (char*) filename.c_str() , "output%08d.mat" , output_index ); 
+	sprintf( (char*) filename.c_str() , "/MAT files/output%08d.mat" , output_index ); 
 	filename.resize( strlen( filename.c_str() ) ); 
 	// std::cout << "\tWriting to file " << filename << " ... " << std::endl; 
 	// microenvironment.write_to_matlab( filename ); 

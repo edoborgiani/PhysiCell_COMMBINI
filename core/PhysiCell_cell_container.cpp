@@ -245,9 +245,14 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 {
 	// secretions and uptakes. Syncing with BioFVM is automated. 
 
+	//std::cout << "It enters" << std::endl; 
+
 	#pragma omp parallel for 
 	for( int i=0; i < (*all_cells).size(); i++ )
 	{
+		//if(i%50==0){ 
+		//	std::cout << i << std::endl; 
+		//} 
 		(*all_cells)[i]->phenotype.secretion.advance( (*all_cells)[i], (*all_cells)[i]->phenotype , diffusion_dt_ );
 	}
 	
@@ -259,6 +264,8 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 	
 	if( fabs(time_since_last_cycle-phenotype_dt_ ) < phenotype_dt_tolerance || !initialzed)
 	{
+		//std::cout << "enters phenotype" << std::endl;
+		//std::cout << (*all_cells).size() << std::endl; 
 		// Reset the max_radius in each voxel. It will be filled in set_total_volume
 		// It might be better if we calculate it before mechanics each time 
 		std::fill(max_cell_interactive_distance_in_voxel.begin(), max_cell_interactive_distance_in_voxel.end(), 0.0);
@@ -267,15 +274,22 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 		{
 			time_since_last_cycle = phenotype_dt_;
 		}
-		
+
+		//std::cout << (*all_cells).size() << std::endl; 
 		// new as of 1.2.1 -- bundles cell phenotype parameter update, volume update, geometry update, 
 		// checking for death, and advancing the cell cycle. Not motility, though. (that's in mechanics)
 		#pragma omp parallel for 
 		for( int i=0; i < (*all_cells).size(); i++ )
 		{
+			//std::cout << i << "/" << (*all_cells).size() << std::endl; 
 			if( (*all_cells)[i]->is_out_of_domain == false )
 			{
+				//std::cout << i << "/" << (*all_cells).size() << std::endl; 
 				(*all_cells)[i]->advance_bundled_phenotype_functions( time_since_last_cycle ); 
+			}
+			else
+			{
+				(*all_cells)[i]->flag_for_removal();
 			}
 		}
 		
@@ -290,6 +304,9 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 		}
 		num_divisions_in_current_step+=  cells_ready_to_divide.size();
 		num_deaths_in_current_step+=  cells_ready_to_die.size();
+
+		//std::cout << num_divisions_in_current_step << std::endl;
+		//std::cout << num_deaths_in_current_step << std::endl;
 		
 		cells_ready_to_die.clear();
 		cells_ready_to_divide.clear();
@@ -297,10 +314,11 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 	}
 		
 	double time_since_last_mechanics= t- last_mechanics_time;
-	
+	//std::cout << "Part one" << std::endl; 
 	// if( time_since_last_mechanics>= mechanics_dt || !initialzed)
 	if( fabs(time_since_last_mechanics - mechanics_dt_) < mechanics_dt_tolerance || !initialzed)
 	{
+		//std::cout << "enters mechanics" << std::endl;
 		if(!initialzed)
 		{
 			time_since_last_mechanics = mechanics_dt_;
@@ -310,22 +328,29 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 		// if we need gradients, compute them
 		if( default_microenvironment_options.calculate_gradients ) 
 		{ microenvironment.compute_all_gradient_vectors();  }
+
+		//std::cout << "Part two" << std::endl; 
+		//std::cout << (*all_cells).size() << std::endl; 
+
 		// end of new in Feb 2018 		
 		
 		// Compute velocities
 		#pragma omp parallel for 
 		for( int i=0; i < (*all_cells).size(); i++ )
 		{
-
+			//std::cout << i << "/" << (*all_cells).size() << std::endl; 
 			if(!(*all_cells)[i]->is_out_of_domain && (*all_cells)[i]->is_movable && (*all_cells)[i]->functions.update_velocity )
 			{
 				// update_velocity already includes the motility update 
 				//(*all_cells)[i]->phenotype.motility.update_motility_vector( (*all_cells)[i] ,(*all_cells)[i]->phenotype , time_since_last_mechanics ); 
+				//std::cout << i << "/" << (*all_cells).size() << std::endl; 
 				(*all_cells)[i]->functions.update_velocity( (*all_cells)[i], (*all_cells)[i]->phenotype, time_since_last_mechanics);
 			}
 
+			//std::cout << i << "/" << (*all_cells).size() << std::endl; 
 			if( (*all_cells)[i]->functions.custom_cell_rule )
 			{
+				//std::cout << i << "/" << (*all_cells).size() << std::endl; 
 				(*all_cells)[i]->functions.custom_cell_rule((*all_cells)[i], (*all_cells)[i]->phenotype, time_since_last_mechanics);
 			}
 		}
@@ -349,6 +374,8 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 	}
 	
 	initialzed=true;
+
+	//std::cout << "It leaves" << std::endl; 
 	return;
 }
 

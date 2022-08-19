@@ -1124,6 +1124,7 @@ void build_cell_definitions_maps( void )
 		Cell_Definition* pCD = cell_definitions_by_index[n]; 
 		cell_definitions_by_name[ pCD->name ] = pCD; 
 		cell_definitions_by_type[ pCD->type ] = pCD; 
+		std::cout << "cell def: " << n << " " << cell_definitions_by_index[n] << " " << pCD << " " << pCD->name << " " << pCD->type << std::endl;
 	}
 
 /*

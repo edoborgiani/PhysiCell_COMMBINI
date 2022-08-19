@@ -196,10 +196,53 @@ std::ostream& operator<<(std::ostream& os, const General_Mesh& mesh)
 
 bool General_Mesh::is_position_valid(double x, double y, double z)
 {
-	if(x< bounding_box[mesh_min_x_index] || x>bounding_box[mesh_max_x_index])
+	/*if(x< bounding_box[mesh_min_x_index] || x>bounding_box[mesh_max_x_index])
 		return false;
 	if(y< bounding_box[mesh_min_y_index] || y>bounding_box[mesh_max_y_index])
+		return false;*/ //USER
+
+	//pugi::xml_node node = xml_find_node( physicell_config_root , "geometry" );
+
+	double dA=900.0; //xml_get_double_value(node, "dA");
+	double dB=750.0; //xml_get_double_value(node, "dB");
+	double dC=600.0; //xml_get_double_value(node, "dC");
+	double dD=250.0; //xml_get_double_value(node, "dD");
+	double dE=200.0; //xml_get_double_value(node, "dE");
+	double dF=500.0; //xml_get_double_value(node, "dF");
+
+	if (y>=(dC+dE) && y>(dA-1.0-((dA-dC-dE)*(((x)*(x))/((dD+dF)*(dD+dF))))))
+	{
 		return false;
+	}
+	if (y<=-(dC+dE) && y<-(dA-1.0-((dA-dC-dE)*(((x)*(x))/((dD+dF)*(dD+dF))))))
+	{
+		return false;
+	}
+ 	if (x>dD && y<(dC+dE) && y>dC)
+	{
+		return false;
+	}
+ 	if (x<-dD && y<(dC+dE) && y>dC)
+	{
+		return false;
+	}
+ 	if (x>dD && y>-(dC+dE) && y<-dC)
+	{
+		return false;
+	}
+	if (x<-dD && y>-(dC+dE) && y<-dC)
+	{
+		return false;
+	}
+ 	if (x>dB && y<=dC && y>=-dC)
+	{
+		return false;
+	}
+ 	if (x<-dB && y<=dC && y>=-dC)
+	{
+		return false;
+	}
+
 	if(z< bounding_box[mesh_min_z_index] || z>bounding_box[mesh_max_z_index])
 		return false;
 	return true;

@@ -14,7 +14,7 @@ print(curpath)
 
 completed=0
 
-os.chdir("C:/Workdir/Programs/PhysiCell_V.1.7.0/PhysiCell_2")
+os.chdir("..")
 
 for n in range(1,2,4):
 
@@ -24,16 +24,16 @@ for n in range(1,2,4):
     os.system("make macrophages")
     os.system("make")
     while (completed==0):
-        os.system("project_migration.exe")
-        os.system("timeout /t 5")
+        os.system("./project_migration")
+        time.sleep(5)
+        #os.system("timeout /t 5")
         if path.exists("./output/CSV files/cells_final.csv"):
             completed=1
         print(completed)
     
     completed=0
-        
     #os.system(resultcmd)
-    os.system("timeout /t 5")
+    #os.system("timeout /t 5")
 
 
         

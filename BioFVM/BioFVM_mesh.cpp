@@ -202,13 +202,13 @@ bool General_Mesh::is_position_valid(double x, double y, double z)
 		return false;*/ //USER
 
 	//pugi::xml_node node = xml_find_node( physicell_config_root , "geometry" );
-
+	
 	double dA=900.0; //xml_get_double_value(node, "dA");
 	double dB=750.0; //xml_get_double_value(node, "dB");
-	double dC=600.0; //xml_get_double_value(node, "dC");
-	double dD=250.0; //xml_get_double_value(node, "dD");
-	double dE=200.0; //xml_get_double_value(node, "dE");
-	double dF=500.0; //xml_get_double_value(node, "dF");
+	double dC=500.0; //xml_get_double_value(node, "dC");
+	double dD=500.0; //xml_get_double_value(node, "dD");
+	double dE=150.0; //xml_get_double_value(node, "dE");
+	double dF=250.0; //xml_get_double_value(node, "dF");
 
 	if (y>=(dC+dE) && y>(dA-1.0-((dA-dC-dE)*(((x)*(x))/((dD+dF)*(dD+dF))))))
 	{

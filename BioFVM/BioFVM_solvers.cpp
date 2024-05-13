@@ -464,7 +464,7 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 			{ 
 				axpy( &(*M.p_density_vectors)[n] , diff_marrow_vector , (*M.p_density_vectors)[n-M.thomas_i_jump] );
 			}
-			else if ((j<=(((dA-dC-dE)/dy)+((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx))))||(j>=(((ycen+dA)/dy)-((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx)))))
+			else if ((j<=(((ycen-dA)/dy)+((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx))))||(j>=(((ycen+dA)/dy)-((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx)))))
 			{
 				axpy( &(*M.p_density_vectors)[n] , diff_muscle_vector , (*M.p_density_vectors)[n-M.thomas_i_jump] );
 			}
@@ -517,7 +517,7 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 			{ 
 				axpy( &(*M.p_density_vectors)[n] , diff_marrow_vector , (*M.p_density_vectors)[n-M.thomas_j_jump] );
 			}
-			else if ((j<=(((dA-dC-dE)/dy)+((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx))))||(j>=(((ycen+dA)/dy)-((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx)))))
+			else if ((j<=(((ycen-dA)/dy)+((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx))))||(j>=(((ycen+dA)/dy)-((dA-dC-dE)/dy)*(((i-xcen/dx)*(i-xcen/dx))/(xcen/dx*xcen/dx)))))
 			{
 				axpy( &(*M.p_density_vectors)[n] , diff_muscle_vector , (*M.p_density_vectors)[n-M.thomas_j_jump] );
 			}

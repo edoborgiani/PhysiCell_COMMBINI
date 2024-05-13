@@ -1320,8 +1320,8 @@ Microenvironment_Options::Microenvironment_Options()
 	
 	time_units = "min"; 
 	spatial_units = "micron"; 
-	dx = 20; 
-	dy = 20; 
+	dx = 10; 
+	dy = 10; 
 	dz = 20; 
 	
 	outer_Dirichlet_conditions = false; 
@@ -1335,10 +1335,10 @@ Microenvironment_Options::Microenvironment_Options()
 	
 	simulate_2D = false; 
 	
-	X_range.resize(2,600.0); 
+	X_range.resize(2,1000.0); 
 	X_range[0] *= -1.0;
 	
-	Y_range.resize(2,600.0); 
+	Y_range.resize(2,1000.0); 
 	Y_range[0] *= -1.0;
 	
 	Z_range.resize(2,600.0); 

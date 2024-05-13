@@ -17,13 +17,13 @@ from pyevtk.hl import gridToVTK
 import glob
 
 curpath=os.path.abspath(os.getcwd()).replace("\\","/")
-print(curpath)
+#print(curpath)
 
 completed=0
 
-os.chdir("..")
+os.chdir("/home/researcher/Physicell_COMMBINI/")
 
-files=glob.glob('./output/new_*_microenvironment0.mat')
+files=glob.glob('./output/XML and MAT files/new_*_microenvironment0.mat')
 files.sort()
 b=0
 

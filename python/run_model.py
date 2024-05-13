@@ -14,7 +14,9 @@ print(curpath)
 
 completed=0
 
-os.chdir("..")
+#os.chdir(os.getenv("HOME")+"/host_home/Physicell_COMMBINI")
+os.chdir("/home/researcher/Physicell_COMMBINI")
+print(curpath)
 
 for n in range(1,2,4):
 
@@ -34,6 +36,7 @@ for n in range(1,2,4):
     completed=0
     #os.system(resultcmd)
     #os.system("timeout /t 5")
+
 
 
         

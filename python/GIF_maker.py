@@ -2,7 +2,7 @@ import imageio
 import glob
 import os
 
-os.chdir("/root/host_home/Physicell_COMMBINI/output")
+os.chdir("/home/researcher/Physicell_COMMBINI/output")
 
 files=glob.glob('./PNG files/Cellular level/snapshot*.png')
 files.sort()

@@ -2,7 +2,7 @@ from cairosvg import svg2png
 import glob
 import os
 
-os.chdir("/root/host_home/Physicell_COMMBINI/output")
+os.chdir("/home/researcher/Physicell_COMMBINI/output")
 
 files=glob.glob('./SVG files/Cellular level/ImmuneF/immunefluorescence*.svg')
 files.sort()

@@ -12,8 +12,6 @@ import numpy as np
 py_folder="$HOME/host_home/Physicell_COMMBINI/python"
 pv_folder="$ROOT/ParaView-5.10.1-osmesa-MPI-Linux-Python3.9-x86_64/bin"
 
-os.system("python run_model.py")
-
 list_cmd=["python VTK_generator.py","python SVG_to_PNG.py","python SVG_to_PNG_IF.py","python GIF_maker.py",pv_folder + "/pvpython VTKtoSVG_pvpy.py","python SVGmerger.py","python SVG_to_PNG_microenv.py","python GIF_maker_microenv.py","python cell_counter.py"]
 
 i=0

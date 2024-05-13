@@ -19,7 +19,7 @@ Connect()
 files_vtr=glob.glob('../output/VTK files/microenvironment_*.vtr')
 files_vtr.sort()
 
-print(files_vtr)
+#print(files_vtr)
 
 #RenderView1=GetActiveView()
 #Delete(renderView1)
@@ -136,8 +136,8 @@ for x in range(0,len(files_vtr)):
     dataTNFColorMap.ApplyPreset('Reds', True)
     dataTNFColorMap.InvertTransferFunction()
     
-    dataTNFColorMap.RescaleTransferFunction(0.0, 1e-11)
-    dataTNFOpacityMap.RescaleTransferFunction(0.0, 1e-11)
+    dataTNFColorMap.RescaleTransferFunction(0.0, 2e-11)
+    dataTNFOpacityMap.RescaleTransferFunction(0.0, 2e-11)
 
     Display1.SetScalarBarVisibility(RenderView1, True)
     TNFscalarBar=GetScalarBar(dataTNFColorMap,RenderView1)
@@ -259,8 +259,8 @@ for x in range(0,len(files_vtr)):
     dataIL10ColorMap.ApplyPreset('Blues', True)
     dataIL10ColorMap.InvertTransferFunction()
     
-    dataIL10ColorMap.RescaleTransferFunction(0.0, 5e-12)
-    dataIL10OpacityMap.RescaleTransferFunction(0.0, 5e-12)
+    dataIL10ColorMap.RescaleTransferFunction(0.0, 2e-11)
+    dataIL10OpacityMap.RescaleTransferFunction(0.0, 2e-11)
 
     Display1.SetScalarBarVisibility(RenderView1, True)
     IL10scalarBar=GetScalarBar(dataIL10ColorMap,RenderView1)

@@ -308,10 +308,12 @@ data-cleanup:
 	mkdir "./output/SVG files"
 	mkdir "./output/CSV files"
 	mkdir "./output/VTK files"
+	mkdir "./output/XML and MAT files"
 	mkdir "./output/SVG files/Cellular level"
 	mkdir "./output/SVG files/Microenvironment"
 	mkdir "./output/SVG files/Cellular level/ImmuneF"
 	mkdir "./output/PNG files/Cellular level"
+	mkdir "./output/PNG files/Microenvironment"
 	mkdir "./output/PNG files/Cellular level/ImmuneF"
 	cp ./paraview/state_microenvironment.pvsm "./output/VTK files/state_microenvironment.pvsm"
 	

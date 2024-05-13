@@ -73,6 +73,9 @@
 #include <omp.h>
 #include <fstream>
 #include <time.h>
+#include <string>
+#include <vector>
+#include <sstream>
 
 #include "./core/PhysiCell.h"
 #include "./modules/PhysiCell_standard_modules.h" 
@@ -137,7 +140,7 @@ int main( int argc, char* argv[] )
 	char filename[1024];
 	char filenamez[1024];
 
-	sprintf( filename , "%s/initial" , PhysiCell_settings.folder.c_str() ); 
+	sprintf( filename , "%s/XML and MAT files/initial" , PhysiCell_settings.folder.c_str() ); 
 	save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
 	
 	// save a quick SVG cross section through z = 0, after setting its 
@@ -192,7 +195,7 @@ int main( int argc, char* argv[] )
 			{
 				if(macro_released==false && abs(60.00-(PhysiCell_globals.current_time-macro_rel_time))<0.1*diffusion_dt) // || PhysiCell_globals.current_time==120 || PhysiCell_globals.current_time==180 || PhysiCell_globals.current_time==240) // 4 hours
 				{
-					//std::cout << std::endl << "RELEASED!" << std::endl;
+					std::cout << std::endl << "RELEASED!" << std::endl;
 					macro_released=true;
 					release_new_macrophages();
 					release_new_neutrophils();
@@ -215,7 +218,7 @@ int main( int argc, char* argv[] )
 				
 				if( PhysiCell_settings.enable_full_saves == true )
 				{	
-					sprintf( filename , "%s/output%08u" , PhysiCell_settings.folder.c_str(),  PhysiCell_globals.full_output_index ); 
+					sprintf( filename , "%s/XML and MAT files/output%08u" , PhysiCell_settings.folder.c_str(),  PhysiCell_globals.full_output_index ); 
 					
 					save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
 				}
@@ -236,7 +239,7 @@ int main( int argc, char* argv[] )
 					
 					SVG_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );  
 					SVG_zoom_plot( filenamez , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );  
-						if(PhysiCell_globals.SVG_output_index%24==0)
+						if(PhysiCell_globals.SVG_output_index%1==0)
 						{
 							std::vector<std::string> (*cell_coloring_function)(Cell*) = immunefluorescence_function;
 
@@ -246,13 +249,13 @@ int main( int argc, char* argv[] )
 							SVG_if_plot( filename , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );  
 							SVG_zoom_if_plot( filenamez , microenvironment, 0.0 , PhysiCell_globals.current_time, cell_coloring_function );  
 
-							sprintf( filename , "%s/CSV files/cells_total_%02u.csv" , PhysiCell_settings.folder.c_str(), PhysiCell_globals.SVG_output_index/24 ); 
+							sprintf( filename , "%s/CSV files/cells_total_%02u.csv" , PhysiCell_settings.folder.c_str(), PhysiCell_globals.SVG_output_index/1); 
 							csv_write( filename , microenvironment, 0.0 , PhysiCell_globals.current_time );
 						}
 
 					if( PhysiCell_settings.enable_full_saves == true )
 					{	
-						sprintf( filename , "%s/new_output%08u" , PhysiCell_settings.folder.c_str(),  PhysiCell_globals.SVG_output_index ); 
+						sprintf( filename , "%s/XML and MAT files/new_output%08u" , PhysiCell_settings.folder.c_str(),  PhysiCell_globals.SVG_output_index ); 
 						save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
 					}
 					
@@ -287,7 +290,7 @@ int main( int argc, char* argv[] )
 	
 	// save a final simulation snapshot 
 	
-	sprintf( filename , "%s/final" , PhysiCell_settings.folder.c_str() ); 
+	sprintf( filename , "%s/XML and MAT files/final" , PhysiCell_settings.folder.c_str() ); 
 	save_PhysiCell_to_MultiCellDS_xml_pugi( filename , microenvironment , PhysiCell_globals.current_time ); 
 	
 	sprintf( filename , "%s/SVG files/Cellular level/final.svg" , PhysiCell_settings.folder.c_str() ); 

@@ -453,10 +453,15 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
 	// DRAW NEW CURVE
 	
 	//os<< "<path d=\"M 300 390 C 800 410 1045 710 1150 790\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+(dA-dC-dE)<<" C "<<xcen+(dD+dF)*0.6<<" "<<top_margin+(dA-dC-dE)*1.05<<" "<<xcen+(dD+dF)*0.85<<" "<<top_margin+(dA-dC-dE)*1.8<<" "<<xcen+(dD+dF)<<" "<<top_margin+(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+(dA-dC-dE)<<" C "<<xcen-(dD+dF)*0.6<<" "<<top_margin+(dA-dC-dE)*1.05<<" "<<xcen-(dD+dF)*0.85<<" "<<top_margin+(dA-dC-dE)*1.8<<" "<<xcen-(dD+dF)<<" "<<top_margin+(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+plot_height-(dA-dC-dE)<<" C "<<xcen+(dD+dF)*0.6<<" "<<top_margin+plot_height-(dA-dC-dE)*1.05<<" "<<xcen+(dD+dF)*0.85<<" "<<top_margin+plot_height-(dA-dC-dE)*1.8<<" "<<xcen+(dD+dF)<<" "<<top_margin+plot_height-(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+plot_height-(dA-dC-dE)<<" C "<<xcen-(dD+dF)*0.6<<" "<<top_margin+plot_height-(dA-dC-dE)*1.05<<" "<<xcen-(dD+dF)*0.85<<" "<<top_margin+plot_height-(dA-dC-dE)*1.8<<" "<<xcen-(dD+dF)<<" "<<top_margin+plot_height-(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+	//os<< "<path d=\"M "<<xcen<<" "<<top_margin+(dA-dC-dE)<<" C "<<xcen+(dD+dF)*0.6<<" "<<top_margin+(dA-dC-dE)*1.05<<" "<<xcen+(dD+dF)*0.85<<" "<<top_margin+(dA-dC-dE)*1.8<<" "<<xcen+(dD+dF)<<" "<<top_margin+(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower+(dD+dF)*0.6<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower+(dD+dF)*0.85<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower+(dD+dF)*1.0<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"black\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower-(dD+dF)*0.6<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower-(dD+dF)*0.85<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower-(dD+dF)*1.0<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower+(dD+dF)*0.6<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower+(dD+dF)*0.85<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower+(dD+dF)*1.0<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower-(dD+dF)*0.6<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower-(dD+dF)*0.85<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower-(dD+dF)*1.0<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+
+//	os<< "<path d=\"M "<<xcen<<" "<<top_margin+(dA-dC-dE)<<" C "<<xcen-(dD+dF)*0.6<<" "<<top_margin+(dA-dC-dE)*1.05<<" "<<xcen-(dD+dF)*0.85<<" "<<top_margin+(dA-dC-dE)*1.8<<" "<<xcen-(dD+dF)<<" "<<top_margin+(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+//	os<< "<path d=\"M "<<xcen<<" "<<top_margin+plot_height-(dA-dC-dE)<<" C "<<xcen+(dD+dF)*0.6<<" "<<top_margin+plot_height-(dA-dC-dE)*1.05<<" "<<xcen+(dD+dF)*0.85<<" "<<top_margin+plot_height-(dA-dC-dE)*1.8<<" "<<xcen+(dD+dF)<<" "<<top_margin+plot_height-(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+//	os<< "<path d=\"M "<<xcen<<" "<<top_margin+plot_height-(dA-dC-dE)<<" C "<<xcen-(dD+dF)*0.6<<" "<<top_margin+plot_height-(dA-dC-dE)*1.05<<" "<<xcen-(dD+dF)*0.85<<" "<<top_margin+plot_height-(dA-dC-dE)*1.8<<" "<<xcen-(dD+dF)<<" "<<top_margin+plot_height-(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
 
 
 	// DRAW BOUNDARIES (user)
@@ -764,10 +769,10 @@ void SVG_if_plot( std::string filename , Microenvironment& M, double z_slice , d
 	// DRAW NEW CURVE
 	
 	//os<< "<path d=\"M 300 390 C 800 410 1045 710 1150 790\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+(dA-dC-dE)<<" C "<<xcen+(dD+dF)*0.6<<" "<<top_margin+(dA-dC-dE)*1.05<<" "<<xcen+(dD+dF)*0.85<<" "<<top_margin+(dA-dC-dE)*1.8<<" "<<xcen+(dD+dF)<<" "<<top_margin+(dA-dC-dE)*2<<"\" stroke=\"white\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+(dA-dC-dE)<<" C "<<xcen-(dD+dF)*0.6<<" "<<top_margin+(dA-dC-dE)*1.05<<" "<<xcen-(dD+dF)*0.85<<" "<<top_margin+(dA-dC-dE)*1.8<<" "<<xcen-(dD+dF)<<" "<<top_margin+(dA-dC-dE)*2<<"\" stroke=\"white\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+plot_height-(dA-dC-dE)<<" C "<<xcen+(dD+dF)*0.6<<" "<<top_margin+plot_height-(dA-dC-dE)*1.05<<" "<<xcen+(dD+dF)*0.85<<" "<<top_margin+plot_height-(dA-dC-dE)*1.8<<" "<<xcen+(dD+dF)<<" "<<top_margin+plot_height-(dA-dC-dE)*2<<"\" stroke=\"white\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+plot_height-(dA-dC-dE)<<" C "<<xcen-(dD+dF)*0.6<<" "<<top_margin+plot_height-(dA-dC-dE)*1.05<<" "<<xcen-(dD+dF)*0.85<<" "<<top_margin+plot_height-(dA-dC-dE)*1.8<<" "<<xcen-(dD+dF)<<" "<<top_margin+plot_height-(dA-dC-dE)*2<<"\" stroke=\"white\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower+(dD+dF)*0.6<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower+(dD+dF)*0.85<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower+(dD+dF)*1.0<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"white\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower-(dD+dF)*0.6<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower-(dD+dF)*0.85<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower-(dD+dF)*1.0<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"white\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower+(dD+dF)*0.6<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower+(dD+dF)*0.85<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower+(dD+dF)*1.0<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"white\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower-(dD+dF)*0.6<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower-(dD+dF)*0.85<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower-(dD+dF)*1.0<<" "<<plot_height+top_margin+dA-(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"white\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
 
 	// DRAW BOUNDARIES (user)
 
@@ -1052,7 +1057,7 @@ void SVG_zoom_plot( std::string filename , Microenvironment& M, double z_slice ,
 
 	double xcen=100;
 
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+(dA-dC-dE)<<" C "<<xcen+(dD+dF)*0.6<<" "<<top_margin+(dA-dC-dE)*1.05<<" "<<xcen+(dD+dF)*0.85<<" "<<top_margin+(dA-dC-dE)*1.8<<" "<<xcen+(dD+dF)<<" "<<top_margin+(dA-dC-dE)*2<<"\" stroke=\"black\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower+(dD+dF)*0.6<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower+(dD+dF)*0.85<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower+(dD+dF)*1.0<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"black\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
 	//os<< "<path d=\"M 1500 780 C 2000 800 2245 1100 2350 1180\" stroke=\"black\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
 
 	// DRAW BOUNDARIES (user)
@@ -1331,7 +1336,7 @@ void SVG_zoom_if_plot( std::string filename , Microenvironment& M, double z_slic
 
 	double xcen=100.0;
 	
-	os<< "<path d=\"M "<<xcen<<" "<<top_margin+(dA-dC-dE)<<" C "<<xcen+(dD+dF)*0.6<<" "<<top_margin+(dA-dC-dE)*1.05<<" "<<xcen+(dD+dF)*0.85<<" "<<top_margin+(dA-dC-dE)*1.8<<" "<<xcen+(dD+dF)<<" "<<top_margin+(dA-dC-dE)*2<<"\" stroke=\"white\" stroke-width=\"1\" fill=\"none\"/>" << std::endl;	//os<< "<path d=\"M 1500 780 C 2000 800 2245 1100 2350 1180\" stroke=\"white\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
+	os<< "<path d=\"M "<<-X_lower<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.0+Y_lower<<" C "<<-X_lower+(dD+dF)*0.6<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.05+Y_lower<<" "<<-X_lower+(dD+dF)*0.85<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*0.8+Y_lower<<" "<<-X_lower+(dD+dF)*1.0<<" "<<plot_height+top_margin-dA+(dA-dC-dE)*1.0+Y_lower<<"\" stroke=\"white\" stroke-width=\"2\" fill=\"none\"/>" << std::endl;
 
 	// DRAW BOUNDARIES (user)
 

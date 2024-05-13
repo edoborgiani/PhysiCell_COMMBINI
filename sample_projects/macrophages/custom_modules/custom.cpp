@@ -73,6 +73,8 @@
 #include <fstream>
 #include <string> 
 #include <unistd.h>
+#include <vector>
+#include <sstream>
 
 #include "./custom.h"
 
@@ -81,9 +83,19 @@
 Cell_Definition macro0; 
 Cell_Definition macro1;
 Cell_Definition macro2;
-Cell_Definition deb;
+//Cell_Definition deb;
 Cell_Definition neutro;
-Cell_Definition MSC;
+//Cell_Definition MSC;
+
+using namespace std;
+
+vector<vector<float>> mech;
+//vector<vector<float>> mech;
+
+double TNFaval;
+double IL10val;
+
+bool mech_do=true;
 
 double ecf=1e12; //exponential correction factor due to small concentration values
 	
@@ -130,7 +142,7 @@ void create_cell_types( void )
 
 	// needed for a 2-D simulation: 
 	
-	/* grab code from heterogeneity */ 
+	// grab code from heterogeneity 
 	
 	cell_defaults.functions.set_orientation = up_orientation; 
 	cell_defaults.phenotype.geometry.polarity = 1.0;
@@ -182,31 +194,14 @@ void create_cell_types( void )
 	// Now, let's define another cell type. 
 	// It's best to just copy the default and modify it.
 
-	macro0 = cell_defaults; 
-	macro0.type = 1; 
-	macro0.name = "macrophage M0";
-
-	macro1 = cell_defaults; 
-	macro1.type = 2; 
-	macro1.name = "macrophage M1";
-
-	macro2 = cell_defaults; 
-	macro2.type = 3; 
-	macro2.name = "macrophage M2";
-
-	neutro = cell_defaults; 
-	neutro.type = 4; 
-	neutro.name = "neutrophils PMN";
-
-	MSC = cell_defaults; 
-	MSC.type = 5; 
-	MSC.name = "MSC";
-
 	//deb = cell_defaults;
 	//deb.type = 4;
 	//deb.name = "debris0";
 	
 	//M0 PROPERTIES
+	macro0 = cell_defaults; 
+	macro0.type = 1; 
+	macro0.name = "macrophage0";
 
 	macro0.functions.update_phenotype = macrophage0_function; 
 	macro0.phenotype.sync_to_functions( cell_defaults.functions );
@@ -241,52 +236,64 @@ void create_cell_types( void )
 	
 	// SECRETION + UPTAKE
 	//macro0.phenotype.secretion.uptake_rates[debris_index] = 0.0;
-	macro0.phenotype.secretion.secretion_rates[TNF_index] = parameters.doubles("k_T0"); // same as M1?
+	macro0.phenotype.secretion.secretion_rates[TNF_index] =1.00*parameters.doubles("k_T0"); // same as M1?
 	macro0.phenotype.secretion.saturation_densities[TNF_index] = 1; // ng/um^3
-	macro0.phenotype.secretion.secretion_rates[TGF_index] = parameters.doubles("k_TG0"); // same as M1?
+	macro0.phenotype.secretion.secretion_rates[TGF_index] =1.00*parameters.doubles("k_TG0"); // same as M1?
 	macro0.phenotype.secretion.saturation_densities[TGF_index] = 1; // ng/um^3
-	macro0.phenotype.secretion.secretion_rates[IL10_index] = parameters.doubles("k_I0"); // same as M1?
+	macro0.phenotype.secretion.secretion_rates[IL10_index] =1.00*parameters.doubles("k_I0"); // same as M1?
 	macro0.phenotype.secretion.saturation_densities[IL10_index] = 1; // ng/um^3
 
-	macro0.phenotype.secretion.secretion_rates[IFN_index] = parameters.doubles("k_IF0"); // not sure
+	macro0.phenotype.secretion.secretion_rates[IFN_index] =1.00*parameters.doubles("k_IF0"); // not sure
 	macro0.phenotype.secretion.saturation_densities[IFN_index] = 1; // ng/um^3
 
 	//	parameters.doubles("viral_internalization_rate"); 
 
 	// MACROPHAGES M1
-	macro1=macro0;
+	// macro1=macro0;
+
+	macro1 = macro0; 
+	macro1.type = 2; 
+	macro1.name = "macrophage1";
 
 	macro1.functions.update_phenotype = macrophage1_function; 
 	macro1.phenotype.sync_to_functions( cell_defaults.functions ); 
 	
 	macro1.parameters.pReference_live_phenotype = &( macro1.phenotype ); 
-	macro1.phenotype.secretion.secretion_rates[TNF_index] = parameters.doubles("k_T1");
-	macro1.phenotype.secretion.secretion_rates[TGF_index] = parameters.doubles("k_TG1");
-	macro1.phenotype.secretion.secretion_rates[IL10_index] = parameters.doubles("k_I1");
-	macro1.phenotype.secretion.secretion_rates[IFN_index] = parameters.doubles("k_IF1");
+	macro1.phenotype.secretion.secretion_rates[TNF_index] =1.00*parameters.doubles("k_T1");
+	macro1.phenotype.secretion.secretion_rates[TGF_index] =1.00*parameters.doubles("k_TG1");
+	macro1.phenotype.secretion.secretion_rates[IL10_index] =1.00*parameters.doubles("k_I1");
+	macro1.phenotype.secretion.secretion_rates[IFN_index] =1.00*parameters.doubles("k_IF1");
 
 	// MACROPHAGES M2
-	macro2=macro0;
+	// macro2=macro0;
+
+	macro2 = macro0; 
+	macro2.type = 3; 
+	macro2.name = "macrophage2";
 
 	macro2.functions.update_phenotype = macrophage2_function; 
 	macro2.phenotype.sync_to_functions( cell_defaults.functions ); 
 	
 	macro2.parameters.pReference_live_phenotype = &( macro2.phenotype ); 
-	macro2.phenotype.secretion.secretion_rates[TNF_index] = parameters.doubles("k_T2");
-	macro2.phenotype.secretion.secretion_rates[TGF_index] = parameters.doubles("k_TG2");
-	macro2.phenotype.secretion.secretion_rates[IL10_index] = parameters.doubles("k_I2");
+	macro2.phenotype.secretion.secretion_rates[TNF_index] =1.00*parameters.doubles("k_T2");
+	macro2.phenotype.secretion.secretion_rates[TGF_index] =1.00*parameters.doubles("k_TG2");
+	macro2.phenotype.secretion.secretion_rates[IL10_index] =1.00*parameters.doubles("k_I2");
 
 	//cell mechanics
 
-/* 	macro0.phenotype.mechanics.cell_cell_adhesion_strength*=0.0;
-	macro1.phenotype.mechanics.cell_cell_adhesion_strength*=0.0;
-	macro2.phenotype.mechanics.cell_cell_adhesion_strength*=0.0; */
+ 	//macro0.phenotype.mechanics.cell_cell_adhesion_strength*=0.0;
+	//macro1.phenotype.mechanics.cell_cell_adhesion_strength*=0.0;
+	//macro2.phenotype.mechanics.cell_cell_adhesion_strength*=0.0; 
 
-/* 	macro0.phenotype.mechanics.cell_cell_repulsion_strength*=3.0;
-	macro1.phenotype.mechanics.cell_cell_repulsion_strength*=3.0;
-	macro2.phenotype.mechanics.cell_cell_repulsion_strength*=3.0; */
+ 	//macro0.phenotype.mechanics.cell_cell_repulsion_strength*=3.0;
+	//macro1.phenotype.mechanics.cell_cell_repulsion_strength*=3.0;
+	//macro2.phenotype.mechanics.cell_cell_repulsion_strength*=3.0; 
+	
 
 	// NEUTROPHILS PMN
+	neutro = cell_defaults; 
+	neutro.type = 4; 
+	neutro.name = "neutrophils";
 
 	neutro.functions.update_phenotype = neutrophils_function;
 	neutro.phenotype.sync_to_functions( cell_defaults.functions );
@@ -325,12 +332,16 @@ void create_cell_types( void )
 	
 	// SECRETION + UPTAKE
 	//macro0.phenotype.secretion.uptake_rates[debris_index] = 0.0;
-	neutro.phenotype.secretion.secretion_rates[TNF_index] = parameters.doubles("k_TN"); 
+	neutro.phenotype.secretion.secretion_rates[TNF_index] =1.00*parameters.doubles("k_TN"); 
 	neutro.phenotype.secretion.saturation_densities[TNF_index] = 1; // ng/um^3
-	neutro.phenotype.secretion.secretion_rates[IFN_index] = parameters.doubles("k_IFN"); 
+	neutro.phenotype.secretion.secretion_rates[IFN_index] =1.00*parameters.doubles("k_IFN"); 
 	neutro.phenotype.secretion.saturation_densities[IFN_index] = 1; // ng/um^3
 
+/*
 	// MESENCHIMAL STEM CELLS MSC
+	MSC = cell_defaults; 
+	MSC.type = 5; 
+	MSC.name = "MSC";
 
 	//MSC.functions.update_phenotype = mesenchimal_function;
 	MSC.phenotype.sync_to_functions( cell_defaults.functions );
@@ -365,9 +376,92 @@ void create_cell_types( void )
 	
 	// no birth 
 	//macrophage.phenotype.cycle.data.transition_rate(G0G1_index, S_index ) = 0.05;
+*/
+
+	std::cout<<"TESTx"<<std::endl;
 
 	build_cell_definitions_maps(); 
 	//display_cell_definitions( std::cout ); 
+
+	if (mech_do){
+	string fname="mech.csv";
+ 
+	vector<float> row;
+	string line, word;
+ 
+	fstream file;
+	file.open(fname);
+	if(file.is_open())
+	{
+		while(getline(file, line))
+		{
+			//std::cout << "GO" << std::endl; 
+			row.clear();
+ 
+			stringstream str(line);
+ 
+			while(getline(str, word, ',')){
+				//std::cout << word << std::endl; 
+				row.push_back(stod(word.c_str()));
+			}
+			mech.push_back(row);
+		}
+	}
+	else
+		std::cout<<"Could not open the file\n";
+
+	// string fname="TNFa_mech.csv";
+ 
+	// vector<float> row;
+	// string line, word;
+ 
+	// fstream file;
+	// file.open(fname);
+	// if(file.is_open())
+	// {
+	// 	while(getline(file, line))
+	// 	{
+	// 		//std::cout << "GO" << std::endl; 
+	// 		row.clear();
+ 
+	// 		stringstream str(line);
+ 
+	// 		while(getline(str, word, ',')){
+	// 			//std::cout << word << std::endl; 
+	// 			row.push_back(stod(word.c_str()));
+	// 		}
+	// 		TNFamech.push_back(row);
+	// 	}
+	// }
+	// else
+	// 	std::cout<<"Could not open the file\n";
+
+	// fname="IL10_mech.csv";
+
+	// fstream file2;
+	// file2.open(fname);
+	// if(file2.is_open())
+	// {
+	// 	while(getline(file2, line))
+	// 	{
+	// 		//std::cout << "GO" << std::endl; 
+	// 		row.clear();
+ 
+	// 		stringstream str(line);
+ 
+	// 		while(getline(str, word, ',')){
+	// 			//std::cout << word << std::endl; 
+	// 			row.push_back(stod(word.c_str()));
+	// 		}
+	// 		IL10mech.push_back(row);
+	// 	}
+	// }
+	// else
+	// 	std::cout<<"Could not open the file\n";
+	
+	std::cout<<"---- MECHANOREGULATION INCLUDED ----"<<std::endl;	
+	}
+
 }
 
 void setup_microenvironment( void )
@@ -779,7 +873,7 @@ void release_new_macrophages( void)
 	double debris_particles=0;
 	for( int n=0; n < microenvironment.number_of_voxels(); n++ )
 	{
-		debris_particles+=microenvironment(n)[debris_index]*1000; //particles, 1000 um^3 volume of 1 voxel
+		debris_particles+=microenvironment(n)[debris_index]*1000; //*1000; //particles, 1000 um^3 volume of 1 voxel
 	}
 	double debris_density=debris_particles/volume_total; // particles/um^3 
 
@@ -925,7 +1019,7 @@ void release_new_neutrophils( void )
 	double debris_particles=0;
 	for( int n=0; n < microenvironment.number_of_voxels(); n++ )
 	{
-		debris_particles+=microenvironment(n)[debris_index]*1000; //particles, 1000 um^3 volume of 1 voxel
+		debris_particles+=microenvironment(n)[debris_index]*1000; //*1000; //particles, 1000 um^3 volume of 1 voxel
 	}
 	double debris_density=debris_particles/volume_total; // particles/um^3 
 
@@ -1415,9 +1509,62 @@ void macrophage0_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 	//int TNF_index = microenvironment.find_density_index("TNFa");
 	//DYNAMICS TO CHECK
-	pCell->phenotype.secretion.secretion_rates[TNF_index]=parameters.doubles("k_T0");
+	//std::vector<std::vector<std::string>> TNFamech;
+	//std::cout << TNFamech[3][2] << std::endl; 
+	//int TNFposmin=inf;
+	//for(int n=0; n<TNFamech.size(); n++ ){
+
+	//} 
+
+	//std::cout << CellPosition[0] << " " << CellPosition[1] << " " << CellPosition[2] << " " << std::endl;
+
+	float TNFfact=1.0;
+	float IL10fact=1.0;
+
+	if (mech_do){
+		int indexmin=0;
+		float distmin=100.0;
+		float dist;
+		float xCell=CellPosition[1]/1000.0;
+		float yCell=CellPosition[2]/1000.0;
+		float zCell=CellPosition[0]/1000.0;
+
+		//std::cout << xCell << " " << yCell << " " << zCell << " " << std::endl;
+
+		if ((abs(xCell)<0.90)&&(abs(yCell)<0.5)&&(abs(zCell)<0.5)){
+			//std::cout << "GO" << std::endl;
+			//std::cout << TNFamech.size() << std::endl;
+			for(int n=0; n<mech.size(); n++ ){
+				dist=sqrt((mech[n][1]-xCell)*(mech[n][1]-xCell)+(mech[n][2]-yCell)*(mech[n][2]-yCell)+(mech[n][3]-zCell)*(mech[n][3]-zCell));
+				if (dist<distmin){
+					indexmin=n;
+					distmin=dist;
+				}
+			} 
+			if (mech[indexmin][4]<0.1)
+				TNFaval=-218571*(mech[indexmin][4]*mech[indexmin][4])+17728.6*(mech[indexmin][4])+100;
+			else
+				TNFaval=602.044*exp(-((mech[indexmin][4]-0.2812418)*(mech[indexmin][4]-0.2812418))/(2*0.1488798*0.1488798));
+			
+			if (mech[indexmin][4]<0.05)
+				IL10val=-100*mech[indexmin][4]+100;
+			else if (mech[indexmin][4]<0.1)
+				IL10val=-1901.667 + 59350*mech[indexmin][4] - 388333.3*mech[indexmin][4]*mech[indexmin][4];
+			else
+				IL10val=178.3333 - 295*mech[indexmin][4] + 116.6667*mech[indexmin][4]*mech[indexmin][4];
+			TNFfact=1.00*TNFaval/112.81;
+			IL10fact=1.00*IL10val/100.0;
+			//std::cout << "M0 " << TNFfact << " " << IL10fact << std::endl;
+		}
+	//std::cout << TNFfact << " " << std::endl;
+	}
+
+	//IL10fact=1.0;
+
+	pCell->phenotype.secretion.secretion_rates[TNF_index]=parameters.doubles("k_T0")*(TNFfact); //USER
 	pCell->phenotype.secretion.secretion_rates[TNF_index]*=(1+(parameters.doubles("k_TI")/(1+1.*exp(ecf*(parameters.doubles("a_TI")-microenvironment(PositionFinal)[IFN_index])))));
-	pCell->phenotype.secretion.secretion_rates[IFN_index]=parameters.doubles("k_IF0")*exp(-parameters.doubles("a_IF0")*microenvironment(PositionFinal)[TNF_index]);
+	pCell->phenotype.secretion.secretion_rates[IFN_index]=1.00*parameters.doubles("k_IF0")*exp(-parameters.doubles("a_IF0")*microenvironment(PositionFinal)[TNF_index]);
+	pCell->phenotype.secretion.secretion_rates[IL10_index]=parameters.doubles("k_I0")*(IL10fact); //USER
 	
 	// DIFFERENTIATE INTO M1 OR M2
 
@@ -1425,8 +1572,8 @@ void macrophage0_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 	double k01=parameters.doubles("k_01");
 	double a01=parameters.doubles("a_01");
-	double g1=k01*microenvironment(PositionFinal)[TNF_index];
-	g1/=(a01+microenvironment(PositionFinal)[TNF_index]);
+	double g1=k01*microenvironment(PositionFinal)[TNF_index]*1.00;
+	g1/=(a01+microenvironment(PositionFinal)[TNF_index]*1.00);
 
 	double gtest1=(double)rand() / RAND_MAX;
 
@@ -1444,8 +1591,8 @@ void macrophage0_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 	double k02=parameters.doubles("k_02");
 	double a02=parameters.doubles("a_02");
-	double g2=k02*microenvironment(PositionFinal)[IL10_index];
-	g2/=(a02+microenvironment(PositionFinal)[IL10_index]);
+	double g2=k02*microenvironment(PositionFinal)[IL10_index]*1.00;
+	g2/=(a02+microenvironment(PositionFinal)[IL10_index]*1.00);
 
 	double gtest2=(double)rand() / RAND_MAX;
 
@@ -1500,7 +1647,7 @@ void boundaries(Cell* pCell)
 		//pCell->assign_position(800-CellPosition[0],CellPosition[1],CellPosition[2]); 
 		pCell->die();
 	} */
-	if (CellPosition[1]>=(dC+dE) && CellPosition[1]>(dA-1.0-((dA-dC-dE)*(((CellPosition[0])*(CellPosition[0]))/((dD+dF)*(dD+dF))))))
+/*  if (CellPosition[1]>=(dC+dE) && CellPosition[1]>(dA-1.0-((dA-dC-dE)*(((CellPosition[0])*(CellPosition[0]))/((dD+dF)*(dD+dF)))))) //THIS
 	{
 		//pCell->assign_position(CellPosition[0],1500-CellPosition[1],CellPosition[2]); 
 		pCell->phenotype.molecular.internalized_total_substrates[debris_index]=0.0;
@@ -1511,7 +1658,7 @@ void boundaries(Cell* pCell)
 		//pCell->assign_position(CellPosition[0],1500-CellPosition[1],CellPosition[2]); 
 		pCell->phenotype.molecular.internalized_total_substrates[debris_index]=0.0;
 		pCell->die();
-	}
+	} */	//TO HERE
 /*  	else if (CellPosition[0]>200.0 && CellPosition[1]<1100.0 && CellPosition[1]>-201 && CellPosition[0]+251 >= -(CellPosition[1]-349))
 	{
 		//pCell->assign_position(CellPosition[0],700-CellPosition[1],CellPosition[2]);
@@ -1522,7 +1669,7 @@ void boundaries(Cell* pCell)
 		//pCell->assign_position(CellPosition[0],-400-CellPosition[1],CellPosition[2]);
 		pCell->die();
 	} */
- 	else if (CellPosition[0]>dD && CellPosition[1]<(dC+dE) && CellPosition[1]>dC)
+/* 	else if (CellPosition[0]>dD && CellPosition[1]<(dC+dE) && CellPosition[1]>dC) //THIS
 	{
 		//pCell->assign_position(-500.0-CellPosition[0],CellPosition[1],CellPosition[2]);
 		pCell->phenotype.molecular.internalized_total_substrates[debris_index]=0.0;
@@ -1557,7 +1704,7 @@ void boundaries(Cell* pCell)
 		//pCell->assign_position(300-CellPosition[0],CellPosition[1],CellPosition[2]);
 		pCell->phenotype.molecular.internalized_total_substrates[debris_index]=0.0;
 		pCell->die();
-	}
+	} */ // TO HERE
 /*  	else if (CellPosition[1]<-750)
 	{
 		//pCell->assign_position(CellPosition[0],-1500-CellPosition[1],CellPosition[2]);
@@ -1702,13 +1849,59 @@ void macrophage1_function( Cell* pCell, Phenotype& phenotype, double dt )
 	int TGF_index = microenvironment.find_density_index( "TGFb" );
 	int IL10_index = microenvironment.find_density_index( "IL10" ); 
 	int IFN_index = microenvironment.find_density_index( "IFNg" );
+
+
 	//DYNAMICS TO CHECK
-	pCell->phenotype.secretion.secretion_rates[IFN_index]=parameters.doubles("k_IF1")*exp(-parameters.doubles("a_IF1")*microenvironment(PositionFinal)[TNF_index]); // not sure!!!
-	pCell->phenotype.secretion.secretion_rates[TNF_index]=parameters.doubles("k_T1")*(parameters.doubles("k_TIL")*exp(-parameters.doubles("a_TIL")*(microenvironment(PositionFinal)[IL10_index]))+parameters.doubles("b_TIL"));
+
+	float TNFfact=1.0;
+	float IL10fact=1.0;
+
+	if (mech_do){
+		int indexmin=0;
+		float distmin=100.0;
+		float dist;
+		float xCell=CellPosition[1]/1000.0;
+		float yCell=CellPosition[2]/1000.0;
+		float zCell=CellPosition[0]/1000.0;
+
+		//std::cout << xCell << " " << yCell << " " << zCell << " " << std::endl;
+
+		if ((abs(xCell)<0.90)&&(abs(yCell)<0.5)&&(abs(zCell)<0.5)){
+			//std::cout << "GO" << std::endl;
+			//std::cout << TNFamech.size() << std::endl;
+			for(int n=0; n<mech.size(); n++ ){
+				dist=sqrt((mech[n][1]-xCell)*(mech[n][1]-xCell)+(mech[n][2]-yCell)*(mech[n][2]-yCell)+(mech[n][3]-zCell)*(mech[n][3]-zCell));
+				if (dist<distmin){
+					indexmin=n;
+					distmin=dist;
+				}
+			} 
+			if (mech[indexmin][4]<0.1)
+				TNFaval=-218571*(mech[indexmin][4]*mech[indexmin][4])+17728.6*(mech[indexmin][4])+100;
+			else
+				TNFaval=602.044*exp(-((mech[indexmin][4]-0.2812418)*(mech[indexmin][4]-0.2812418))/(2*0.1488798*0.1488798));
+			
+			if (mech[indexmin][4]<0.05)
+				IL10val=-100*mech[indexmin][4]+100;
+			else if (mech[indexmin][4]<0.1)
+				IL10val=-1901.667 + 59350*mech[indexmin][4] - 388333.3*mech[indexmin][4]*mech[indexmin][4];
+			else
+				IL10val=178.3333 - 295*mech[indexmin][4] + 116.6667*mech[indexmin][4]*mech[indexmin][4];
+			TNFfact=1.00*TNFaval/112.81;
+			IL10fact=1.00*IL10val/100.0;
+			//std::cout << "M0 " << TNFfact << " " << IL10fact << std::endl;
+		}
+	//std::cout << TNFfact << " " << std::endl;
+	}
+
+	//IL10fact=1.0;
+
+	pCell->phenotype.secretion.secretion_rates[IFN_index]=1.00*parameters.doubles("k_IF1")*exp(-parameters.doubles("a_IF1")*microenvironment(PositionFinal)[TNF_index]); // not sure!!!
+	pCell->phenotype.secretion.secretion_rates[TNF_index]=parameters.doubles("k_T1")*TNFfact*(parameters.doubles("k_TIL")*exp(-parameters.doubles("a_TIL")*(microenvironment(PositionFinal)[IL10_index]))+parameters.doubles("b_TIL"));
 	pCell->phenotype.secretion.secretion_rates[TNF_index]*=(parameters.doubles("k_TTGF")*exp(-parameters.doubles("a_TTGF")*(microenvironment(PositionFinal)[TGF_index]))+parameters.doubles("b_TTGF"));
 	pCell->phenotype.secretion.secretion_rates[TNF_index]*=(1+(parameters.doubles("k_TI")/(1+1.*exp(ecf*(parameters.doubles("a_TI")-microenvironment(PositionFinal)[IFN_index])))));
-	pCell->phenotype.secretion.secretion_rates[IL10_index]=parameters.doubles("k_I1")*(1+((parameters.doubles("a_I1")*microenvironment(PositionFinal)[TGF_index])/(1+(parameters.doubles("a_I1")*microenvironment(PositionFinal)[TGF_index]))));
-	pCell->phenotype.secretion.secretion_rates[TGF_index] = parameters.doubles("k_TG1");
+	pCell->phenotype.secretion.secretion_rates[IL10_index]=parameters.doubles("k_I1")*IL10fact*(1+((parameters.doubles("a_I1")*microenvironment(PositionFinal)[TGF_index])/(1+(parameters.doubles("a_I1")*microenvironment(PositionFinal)[TGF_index]))));
+	pCell->phenotype.secretion.secretion_rates[TGF_index] =1.00*parameters.doubles("k_TG1");
 
 	//PROLIFERATION
 	pCell->phenotype.cycle.data.transition_rate(0,0)*=(parameters.doubles("k_1")+((1-parameters.doubles("k_1"))/(1+exp(ecf*(microenvironment(PositionFinal)[IFN_index]-parameters.doubles("a_1"))))));; //proliferation ratio
@@ -1729,8 +1922,8 @@ void macrophage1_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 	double k12=parameters.doubles("k_12");
 	double a12=parameters.doubles("a_12");
-	double g2=k12*microenvironment(PositionFinal)[IL10_index];
-	g2/=(a12+microenvironment(PositionFinal)[IL10_index]);
+	double g2=k12*microenvironment(PositionFinal)[IL10_index]*1.00;
+	g2/=(a12+microenvironment(PositionFinal)[IL10_index]*1.00);
 
 	double gtest2=(double)rand() / RAND_MAX;
 
@@ -1858,10 +2051,54 @@ void macrophage2_function( Cell* pCell, Phenotype& phenotype, double dt )
 	int TGF_index = microenvironment.find_density_index( "TGFb" );
 	int IL10_index = microenvironment.find_density_index( "IL10" );
 	int IFN_index = microenvironment.find_density_index( "IFNg" );
-	pCell->phenotype.secretion.secretion_rates[TNF_index]=parameters.doubles("k_T2");
+
+	float TNFfact=1.0;
+	float IL10fact=1.0;
+
+	if (mech_do){
+		int indexmin=0;
+		float distmin=100.0;
+		float dist;
+		float xCell=CellPosition[1]/1000.0;
+		float yCell=CellPosition[2]/1000.0;
+		float zCell=CellPosition[0]/1000.0;
+
+		//std::cout << xCell << " " << yCell << " " << zCell << " " << std::endl;
+
+		if ((abs(xCell)<0.90)&&(abs(yCell)<0.5)&&(abs(zCell)<0.5)){
+			//std::cout << "GO" << std::endl;
+			//std::cout << TNFamech.size() << std::endl;
+			for(int n=0; n<mech.size(); n++ ){
+				dist=sqrt((mech[n][1]-xCell)*(mech[n][1]-xCell)+(mech[n][2]-yCell)*(mech[n][2]-yCell)+(mech[n][3]-zCell)*(mech[n][3]-zCell));
+				if (dist<distmin){
+					indexmin=n;
+					distmin=dist;
+				}
+			} 
+			if (mech[indexmin][4]<0.1)
+				TNFaval=-218571*(mech[indexmin][4]*mech[indexmin][4])+17728.6*(mech[indexmin][4])+100;
+			else
+				TNFaval=602.044*exp(-((mech[indexmin][4]-0.2812418)*(mech[indexmin][4]-0.2812418))/(2*0.1488798*0.1488798));
+			
+			if (mech[indexmin][4]<0.05)
+				IL10val=-100*mech[indexmin][4]+100;
+			else if (mech[indexmin][4]<0.1)
+				IL10val=-1901.667 + 59350*mech[indexmin][4] - 388333.3*mech[indexmin][4]*mech[indexmin][4];
+			else
+				IL10val=178.3333 - 295*mech[indexmin][4] + 116.6667*mech[indexmin][4]*mech[indexmin][4];
+			TNFfact=1.00*TNFaval/112.81;
+			IL10fact=1.00*IL10val/100.0;
+			//std::cout << "M0 " << TNFfact << " " << IL10fact << std::endl;
+		}
+	//std::cout << TNFfact << " " << std::endl;
+	}
+
+	//IL10fact=1.0;
+
+	pCell->phenotype.secretion.secretion_rates[TNF_index]=parameters.doubles("k_T2")*TNFfact;
 	pCell->phenotype.secretion.secretion_rates[TNF_index]*=(1+(parameters.doubles("k_TI")/(1+1.*exp(ecf*(parameters.doubles("a_TI")-microenvironment(PositionFinal)[IFN_index])))));
-	pCell->phenotype.secretion.secretion_rates[TGF_index] = parameters.doubles("k_TG2");
-	pCell->phenotype.secretion.secretion_rates[IL10_index] = parameters.doubles("k_I2");
+	pCell->phenotype.secretion.secretion_rates[TGF_index] =1.00*parameters.doubles("k_TG2");
+	pCell->phenotype.secretion.secretion_rates[IL10_index] = parameters.doubles("k_I2")*IL10fact;
 	pCell->phenotype.secretion.secretion_rates[IFN_index] = 0;
 
 	// PROLIFERATION
@@ -1881,8 +2118,8 @@ void macrophage2_function( Cell* pCell, Phenotype& phenotype, double dt )
 
 	double k21=parameters.doubles("k_21");
 	double a21=parameters.doubles("a_21");
-	double g1=k21*microenvironment(PositionFinal)[TNF_index];
-	g1/=(a21+microenvironment(PositionFinal)[TNF_index]);
+	double g1=k21*microenvironment(PositionFinal)[TNF_index]*1.00;
+	g1/=(a21+microenvironment(PositionFinal)[TNF_index]*1.00);
 
 	double gtest2=(double)rand() / RAND_MAX;
 
@@ -1974,10 +2211,10 @@ void neutrophils_function( Cell* pCell, Phenotype& phenotype, double dt )
 	//int IFN_index = microenvironment.find_density_index( "IFNg" );
 	//int IL12_index = microenvironment.find_density_index( "IL12" ); 
 
-	pCell->phenotype.secretion.secretion_rates[TNF_index]=parameters.doubles("k_TN");
+	pCell->phenotype.secretion.secretion_rates[TNF_index]=1.00*parameters.doubles("k_TN");
 	pCell->phenotype.secretion.secretion_rates[IL10_index]=0;
 	pCell->phenotype.secretion.secretion_rates[TGF_index]=0;
-	pCell->phenotype.secretion.secretion_rates[IFN_index]=parameters.doubles("k_IFN"); //  /(1+exp(2.5e-12-microenvironment(PositionFinal)[IFN_index]));
+	pCell->phenotype.secretion.secretion_rates[IFN_index]=1.00*parameters.doubles("k_IFN"); //  /(1+exp(2.5e-12-microenvironment(PositionFinal)[IFN_index]));
 
 	boundaries(pCell);
 	return; 
